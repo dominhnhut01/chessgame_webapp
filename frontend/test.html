@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js"
+      integrity="sha512-xbQU0+iHqhVt7VIXi6vBJKPh3IQBF5B84sSHdjKiSccyX/1ZI7Vnkt2/8y8uruj63/DVmCxfUNohPNruthTEQA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <title>Chat Room</title>
+  </head>
+  <body>
+    <input type="text" id="message" placeholder="Enter your message" />
+    <button id="send">Send</button>
+    <ul id="messages"></ul>
+
+    <!-- <script src="/socket.io/socket.io.js"></script> -->
+    <script>
+      const socket = io("http://localhost:5000");
+
+      const messageInput = document.getElementById("message");
+      const sendButton = document.getElementById("send");
+      const messagesList = document.getElementById("messages");
+      // const roomId = 'your-room-id'; // Replace with your desired room ID
+
+      socket.emit("handshake", async (roomId) => {
+        console.log(`initialize room: ${roomId}`);
+        sendButton.addEventListener("click", () => {
+          const message = messageInput.value;
+          socket.emit("move", roomId, message);
+          messageInput.value = "";
+        });
+      });
+      socket.on("response_move", (message) => {
+        const li = document.createElement("li");
+        console.log(message);
+        li.textContent = message;
+        messagesList.appendChild(li);
+      });
+    </script>
+  </body>
+</html>
