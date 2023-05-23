@@ -1,11 +1,18 @@
-import { Chess, Color, PieceSymbol, Square } from "chess.js";
+import { Chess, Move, PieceSymbol, Color} from 'chess.js';
 
-/**
- * Position info of the Piece
- */
+type PieceName = `${PieceSymbol}${Color}`;
+type Rank = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
+type File = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h";
+type Square = {
+  rank: Rank;
+  file: File;
+};
+
 type Piece = {
-  rank: string;
-  file: string;
+  color: Color;
+  pieceSymbol: PieceSymbol;
+  pieceName: PieceName;
+  position: Square;
 };
 
 class ChessAIEngine {
@@ -13,104 +20,110 @@ class ChessAIEngine {
     [
       "p",
       [
-        0, 0, 0, 0, 0, 0, 0, 0,
-        50, 50, 50, 50, 50, 50, 50, 50,
-        10, 10, 20, 30, 30, 20, 10, 10,
-        5, 5, 10, 25, 25, 10, 5, 5,
-        0, 0, 0, 20, 20, 0, 0, 0,
-        5, -5, -10, 0, 0, -10, -5, 5,
-        5, 10, 10, -20, -20, 10, 10, 5,
-        0, 0, 0, 0, 0, 0, 0, 0
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [5, 10, 10, -20, -20, 10, 10, 5],
+        [5, -5, -10, 0, 0, -10, -5, 5],
+        [0, 0, 0, 20, 20, 0, 0, 0],
+        [5, 5, 10, 25, 25, 10, 5, 5],
+        [10, 10, 20, 30, 30, 20, 10, 10],
+        [50, 50, 50, 50, 50, 50, 50, 50],
+        [0, 0, 0, 0, 0, 0, 0, 0],
       ],
     ],
     [
       "n",
       [
-        -50, -40, -30, -30, -30, -30, -40, -50,
-        -40, -20, 0, 0, 0, 0, -20, -40,
-        -30, 0, 10, 15, 15, 10, 0, -30,
-        -30, 5, 15, 20, 20, 15, 5, -30,
-        -30, 0, 15, 20, 20, 15, 0, -30,
-        -30, 5, 10, 15, 15, 10, 5, -30,
-        -40, -20, 0, 5, 5, 0, -20, -40,
-        -50, -40, -30, -30, -30, -30, -40, -50
+        [-50, -40, -30, -30, -30, -30, -40, -50],
+        [-40, -20, 0, 5, 5, 0, -20, -40],
+        [-30, 5, 10, 15, 15, 10, 5, -30],
+        [-30, 0, 15, 20, 20, 15, 0, -30],
+        [-30, 5, 15, 20, 20, 15, 5, -30],
+        [-30, 0, 10, 15, 15, 10, 0, -30],
+        [-40, -20, 0, 0, 0, 0, -20, -40],
+        [-50, -40, -30, -30, -30, -30, -40, -50],
       ],
     ],
     [
       "b",
       [
-        -20, -10, -10, -10, -10, -10, -10, -20,
-        -10, 0, 0, 0, 0, 0, 0, -10,
-        -10, 0, 5, 10, 10, 5, 0, -10,
-        -10, 5, 5, 10, 10, 5, 5, -10,
-        -10, 0, 10, 10, 10, 10, 0, -10,
-        -10, 10, 10, 10, 10, 10, 10, -10,
-        -10, 5, 0, 0, 0, 0, 5, -10,
-        -20, -10, -10, -10, -10, -10, -10, -20,
+        [-20, -10, -10, -10, -10, -10, -10, -20],
+        [-10, 5, 0, 0, 0, 0, 5, -10],
+        [-10, 10, 10, 10, 10, 10, 10, -10],
+        [-10, 0, 10, 10, 10, 10, 0, -10],
+        [-10, 5, 5, 10, 10, 5, 5, -10],
+        [-10, 0, 5, 10, 10, 5, 0, -10],
+        [-10, 0, 0, 0, 0, 0, 0, -10],
+        [-20, -10, -10, -10, -10, -10, -10, -20],
       ],
     ],
     [
       "r",
       [
-        0, 0, 0, 0, 0, 0, 0, 0,
-        5, 10, 10, 10, 10, 10, 10, 5,
-        -5, 0, 0, 0, 0, 0, 0, -5,
-        -5, 0, 0, 0, 0, 0, 0, -5,
-        -5, 0, 0, 0, 0, 0, 0, -5,
-        -5, 0, 0, 0, 0, 0, 0, -5,
-        -5, 0, 0, 0, 0, 0, 0, -5,
-        0, 0, 0, 5, 5, 0, 0, 0
+        [0, 0, 0, 5, 5, 0, 0, 0],
+        [-5, 0, 0, 0, 0, 0, 0, -5],
+        [-5, 0, 0, 0, 0, 0, 0, -5],
+        [-5, 0, 0, 0, 0, 0, 0, -5],
+        [-5, 0, 0, 0, 0, 0, 0, -5],
+        [-5, 0, 0, 0, 0, 0, 0, -5],
+        [5, 10, 10, 10, 10, 10, 10, 5],
+        [0, 0, 0, 0, 0, 0, 0, 0],
       ],
     ],
     [
       "q",
       [
-        -20, -10, -10, -5, -5, -10, -10, -20,
-        -10, 0, 0, 0, 0, 0, 0, -10,
-        -10, 0, 5, 5, 5, 5, 0, -10,
-        -5, 0, 5, 5, 5, 5, 0, 0,
-        0, 0, 5, 5, 5, 5, 0, -5,
-        -10, 0, 5, 5, 5, 5, 0, -10,
-        -10, 5, 0, 0, 0, 0, 0, -10,
-        -20, -10, -10, -5, -5, -10, -10, -20
+        [20, 30, 10, 0, 0, 10, 30, 20],
+        [20, 20, 0, 0, 0, 0, 20, 20],
+        [-10, -20, -20, -20, -20, -20, -20, -10],
+        [-20, -30, -30, -40, -40, -30, -30, -20],
+        [-30, -40, -40, -50, -50, -40, -40, -30],
+        [-30, -40, -40, -50, -50, -40, -40, -30],
+        [-30, -40, -40, -50, -50, -40, -40, -30],
+        [-30, -40, -40, -50, -50, -40, -40, -30],
       ],
     ],
 
     [
       "k",
       [
-        20, 30, 10, 0, 0, 10, 30, 20,
-        -30, -40, -40, -50, -50, -40, -40, -30,
-        -30, -40, -40, -50, -50, -40, -40, -30,
-        -30, -40, -40, -50, -50, -40, -40, -30,
-        -30, -40, -40, -50, -50, -40, -40, -30,
-        -10, -20, -20, -20, -20, -20, -20, -10,
-        20, 20, 0, 0, 0, 0, 20, 20,
-        20, 30, 10, 0, 0, 10, 30, 20
+        [20, 30, 10, 0, 0, 10, 30, 20],
+        [20, 20, 0, 0, 0, 0, 20, 20],
+        [-10, -20, -20, -20, -20, -20, -20, -10],
+        [-20, -30, -30, -40, -40, -30, -30, -20],
+        [-30, -40, -40, -50, -50, -40, -40, -30],
+        [-30, -40, -40, -50, -50, -40, -40, -30],
+        [-30, -40, -40, -50, -50, -40, -40, -30],
+        [-30, -40, -40, -50, -50, -40, -40, -30],
       ],
     ],
   ]);
 
-  readonly types: string[] = ["p", "n", "k", "q", "b", "r"];
-  readonly colors: string[] = ["w", "b"];
-  readonly pieceWeights: Map<string, number> = new Map([
-    ["p", 100],
-    ["n", 320],
-    ["b", 330],
-    ["r", 500],
-    ["q", 900],
+  readonly symbols: PieceSymbol[] = ["p", "n", "k", "q", "b", "r"];
+  readonly colors: Color[] = ["w", "b"];
+  readonly pieceWeights: Map<PieceSymbol, number> = new Map([
+    ["p", 1000],
+    ["n", 3200],
+    ["b", 3300],
+    ["r", 5000],
+    ["q", 9000],
+    ["k", 20000],
   ]);
-
-  readonly minimaxSearchDepth: number = 3;
+  minimaxSearchDepth: number;
   chess: Chess;
+  curEvaluationScore: number;
 
-  constructor() {
+  constructor(difficultyLevel: number) {
     this.chess = new Chess();
+    this.curEvaluationScore = this.calcEvaluationScore(this.chess.board());
+    this.minimaxSearchDepth = difficultyLevel * 2 + 1;
+
   }
 
-  switchSide(rank: string, file: string): string[] {
-    const newRank: string = (9 - parseInt(rank)).toString();
-    const newFile: string = (7 - (file.charCodeAt(0) - 97) + 97).toString();
+  switchSide(rank: Rank, file: File): [Rank, File] {
+    const newRank: Rank = (9 - parseInt(rank)).toString() as Rank;
+    const newFile: File = String.fromCharCode(
+      7 - (file.charCodeAt(0) - 97) + 97
+    ) as File;
 
     return [newRank, newFile];
   }
@@ -119,68 +132,92 @@ class ChessAIEngine {
    * @param chessBoard
    * @returns countRecord: {'chessPieceName': Piece[]}
    */
-  examineBoard(chessBoard: any[][]): Map<string, Piece[]> {
-    let countRecord = new Map<string, Piece[]>();
-    chessBoard.forEach((row, rank) => {
-      row.forEach((square, file) => {
-        const curType = square?.type;
-        const curColor = square?.color;
-        if (curType === undefined || curColor === undefined) return;
-        const curPieceCode: string = curType + curColor;
-        if (!countRecord.has(curPieceCode)) countRecord.set(curPieceCode, []);
+  examineBoard(chessBoard: any[][]): Map<PieceName, Piece[]> {
+    let countRecord = new Map<PieceName, Piece[]>();
+    chessBoard.forEach((row) => {
+      row.forEach((square) => {
+        if (
+          square === null ||
+          square.type === undefined ||
+          square.color === undefined
+        )
+          return;
+        const rank: Rank = square.square.charAt(1);
+        const file: File = square.square.charAt(0);
+        const curSymbol = square.type;
+        const curColor = square.color;
+        const curPieceName: PieceName = curSymbol + curColor;
+        if (!countRecord.has(curPieceName)) countRecord.set(curPieceName, []);
 
         let curPiece: Piece;
-        if (curColor === "w") {
+
+        if (square.color === "w") {
+          const position: Square = {
+            rank: rank,
+            file: file,
+          };
           curPiece = {
-            rank: rank.toString(),
-            file: String.fromCharCode(file + 97),
+            position: position,
+            pieceName: curPieceName,
+            color: curColor,
+            pieceSymbol: curSymbol,
           };
         } else {
-          // const [newRank, newFile] = this.switchSide(
-          //   rank.toString(),
-          //   String.fromCharCode(file + 97)
-          // );
-          // curPiece = {
-          //   rank: newRank,
-          //   file: newFile,
-          // };
+          const [newRank, newFile] = this.switchSide(
+            rank,
+            file
+          );
+          const position: Square = {
+            rank: newRank,
+            file: newFile,
+          };
           curPiece = {
-            rank: rank.toString(),
-            file: String.fromCharCode(file + 97),
+            position: position,
+            pieceName: curPieceName,
+            color: curColor,
+            pieceSymbol: curSymbol,
           };
         }
-        countRecord.get(curPieceCode)?.push(curPiece);
+        countRecord.get(curPieceName)?.push(curPiece);
       });
     });
 
     return countRecord;
   }
+  /**
+   * Calculate the position score of one single piece
+   * @param curPiece
+   * @returns
+   */
+  calcPositionScore(curPiece: Piece) {
+    const rankDecode: number = parseInt(curPiece.position.rank) - 1;
+    const fileDecode: number = curPiece.position.file.charCodeAt(0) - 97;
+    return this.pieceTables.get(curPiece.pieceSymbol)![rankDecode][fileDecode];
+  }
 
-
-  calcPostionScore(type: string, piecesInfo: Map<string, Piece[]>): number {
+  calcTotalPostionScore(
+    symbol: PieceSymbol,
+    piecesInfo: Map<string, Piece[]>
+  ): number {
     //Remember that notation flips when different side
-    // const sumTable = piecesInfo.get(type + "w")!.reduce((curSum: number, piece) => {
+    // const sumTable = piecesInfo.get(symbol + "w")!.reduce((curSum: number, piece) => {
     //   const curIdx = parseInt(piece.rank) * 8 + (piece.file.charCodeAt(0) - 97);
-    //   curSum += this.pieceTables.get(type)![curIdx];
+    //   curSum += this.pieceTables.get(symbol)![curIdx];
     // }, [])
 
     let curSum = 0;
-
-    if (piecesInfo.has(type + "w")) {
-      for (let curPiece of piecesInfo.get(type + "w")!) {
-        const curIdx =
-          parseInt(curPiece.rank) * 8 + (curPiece.file.charCodeAt(0) - 97);
-        curSum += this.pieceTables.get(type)![curIdx];
+    if (piecesInfo.has(symbol + "w")) {
+      for (let curPiece of piecesInfo.get(symbol + "w")!) {
+        curSum += this.calcPositionScore(curPiece);
       }
     }
 
-    if (piecesInfo.has(type + "b")) {
-      for (let curPiece of piecesInfo.get(type + "b")!) {
-        const curIdx =
-          parseInt(curPiece.rank) * 8 + (curPiece.file.charCodeAt(0) - 97);
-        curSum -= this.pieceTables.get(type)![curIdx];
+    if (piecesInfo.has(symbol + "b")) {
+      for (let curPiece of piecesInfo.get(symbol + "b")!) {
+        curSum -= this.calcPositionScore(curPiece);
       }
     }
+
     return curSum;
   }
   /**
@@ -188,26 +225,80 @@ class ChessAIEngine {
    * @returns evaluation score: number
    */
   calcEvaluationScore(chessBoard: any[][]): number {
-    const piecesInfo: Map<string, Piece[]> = this.examineBoard(chessBoard);
+    const piecesInfo: Map<PieceName, Piece[]> = this.examineBoard(chessBoard);
     let material = 0;
     let positionScore = 0;
-    for (let type of this.types) {
+    for (let symbol of this.symbols) {
       let pieceNumberDifference: number = 0;
-      if (piecesInfo.has(type + "w")) {
-        pieceNumberDifference += piecesInfo.get(type + "w")!.length;
+      if (piecesInfo.has(`${symbol}b`)) {
+        pieceNumberDifference -= piecesInfo.get(`${symbol}b`)!.length;
       }
 
-      if (piecesInfo.has(type + "b")) {
-        pieceNumberDifference -= piecesInfo.get(type + "b")!.length;
+      if (piecesInfo.has(`${symbol}w`)) {
+        pieceNumberDifference += piecesInfo.get(`${symbol}w`)!.length;
       }
 
-      material += this.pieceWeights.get(type)! * pieceNumberDifference;
+      material += this.pieceWeights.get(symbol)! * pieceNumberDifference;
 
-      positionScore += this.calcPostionScore(type, piecesInfo);
+      positionScore += this.calcTotalPostionScore(symbol, piecesInfo);
     }
-    return this.chess.turn() === "w"
+
+    return this.chess.turn() !== "w"
       ? material + positionScore
       : -material - positionScore;
+  }
+
+  calcNextEvaluationScore(moveHistory: Move[], scoreHistory: number[]): number {
+    let score = -this.curEvaluationScore;
+    const refScore = this.calcEvaluationScore(this.chess.board());
+    let scores_log: number[] = [];
+    for (let idx = 0; idx < moveHistory.length; idx++) {
+      score = -score
+      let move = moveHistory[idx];
+      //Update position score
+      let rankFrom = move.from.charAt(1) as Rank;
+      let fileFrom = move.from.charAt(0) as File;
+      let rankTo = move.to.charAt(1) as Rank;
+      let fileTo = move.to.charAt(0) as File;
+      if (move.color === "b") {
+        [rankFrom, fileFrom] = this.switchSide(rankFrom, fileFrom);
+        [rankTo, fileTo] = this.switchSide(rankTo, fileTo);
+      }
+
+      const pieceFrom: Piece = {
+        color: move.color,
+        pieceSymbol: move.piece,
+        pieceName: `${move.piece}${move.color}`,
+        position: {
+          rank: rankFrom,
+          file: fileFrom,
+        },
+      };
+      const pieceTo: Piece = {
+        color: move.color,
+        pieceSymbol: move.piece,
+        pieceName: `${move.piece}${move.color}`,
+        position: {
+          rank: rankTo,
+          file: fileTo,
+        },
+      };
+      const sign = move.color === "b" ? -1 : 1;
+      score +=
+        sign *
+        (-this.calcPositionScore(pieceFrom) + this.calcPositionScore(pieceTo));
+
+      //Update material score if there is a capture
+      if (move.flags.includes("c") || move.flags.includes("e")) {
+        const capturedPieceSymbol = move.captured;
+        const capturedPieceWeight = this.pieceWeights.get(capturedPieceSymbol);
+        score += sign * capturedPieceWeight;
+      }
+      score = -score;
+      scores_log.push(score);
+    }
+    // score = -score;
+    return score;
   }
 
   quiesce(alpha: number, beta: number): number {
@@ -229,14 +320,32 @@ class ChessAIEngine {
     return alpha;
   }
 
-  alphabeta(alpha: number, beta: number, depth: number): number {
-    if (depth === 0) return this.quiesce(alpha, beta);
+  alphabeta(
+    alpha: number,
+    beta: number,
+    depth: number,
+    moveHistory: Move[],
+    scoreHistory: number[]
+  ): number {
+    // if (depth === 0) return this.quiesce(alpha, beta);
+    if (depth === 0)
+      return this.calcNextEvaluationScore(moveHistory, scoreHistory);
     // return -alpha;
     let bestScore = -9999;
     for (let move of this.chess.moves()) {
-      this.chess.move(move);
-      let score = -this.alphabeta(-beta, -alpha, depth - 1);
+      const next_move = this.chess.move(move);
+      scoreHistory.push(this.calcEvaluationScore(this.chess.board()));
+      moveHistory.push(next_move);
+      let score = -this.alphabeta(
+        -beta,
+        -alpha,
+        depth - 1,
+        moveHistory,
+        scoreHistory
+      );
       this.chess.undo();
+      scoreHistory.pop();
+      moveHistory.pop();
       if (score >= beta) return score;
       if (score > bestScore) bestScore = score;
       if (score > alpha) alpha = score;
@@ -250,8 +359,14 @@ class ChessAIEngine {
     let alpha = -100000;
     let beta = 100000;
     for (let move of this.chess.moves()) {
-      this.chess.move(move);
-      let boardScore = -this.alphabeta(-beta, -alpha, depth - 1);
+      const next_move = this.chess.move(move);
+      let boardScore = -this.alphabeta(
+        -beta,
+        -alpha,
+        depth - 1,
+        [next_move],
+        [this.calcEvaluationScore(this.chess.board())]
+      );
 
       if (boardScore >= bestScore) {
         bestScore = boardScore;
@@ -262,6 +377,7 @@ class ChessAIEngine {
       this.chess.undo();
     }
 
+    this.curEvaluationScore = bestScore;
     return bestMove;
   }
 
@@ -276,11 +392,17 @@ class ChessAIEngine {
   }
 
   updatePlayerMove(playerMoveFrom: string, playerMoveTo: string): void {
+    let scoreHistory = [this.calcEvaluationScore(this.chess.board())];
     this.chess.move({
       from: playerMoveFrom,
       to: playerMoveTo,
       promotion: "q",
     });
+
+    this.curEvaluationScore = -this.calcNextEvaluationScore(
+      [this.chess.history({ verbose: true }).pop()],
+      scoreHistory
+    );
   }
 }
 

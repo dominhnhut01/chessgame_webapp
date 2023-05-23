@@ -55,12 +55,17 @@ function ChessBoard() {
     if (game.game_over() || game.in_draw() || possibleMoves.length === 0)
       return;
 
-    socket.emit('playerMakeMove', playerMoveFrom, playerMoveTo, (computerMove) => {
-      safeGameMutate((game) => {
-        console.log(`Computer move: ${computerMove}`)
-        game.move(computerMove);
-      });
-    })
+    socket.emit(
+      "playerMakeMove",
+      playerMoveFrom,
+      playerMoveTo,
+      (computerMove) => {
+        safeGameMutate((game) => {
+          console.log(`Computer move: ${computerMove}`);
+          game.move(computerMove);
+        });
+      }
+    );
   }
 
   function onSquareClick(square) {
@@ -92,7 +97,7 @@ function ChessBoard() {
       return;
     }
 
-    setTimeout(computerMakeMove, 10000, moveFrom, square);
+    computerMakeMove(moveFrom, square);
     setMoveFrom("");
     setOptionSquares({});
   }
@@ -137,7 +142,7 @@ function ChessBoard() {
           ...optionSquares,
           ...rightClickedSquares,
         }}
-        boardWidth={900}
+        boardWidth={400}
       />
     </div>
   );

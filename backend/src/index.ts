@@ -58,4 +58,5 @@ app.use((req, res, next) => {
 });
 
 /** Listen */
-httpServer.listen(5000, () => console.info(`Server is running`));
+const port = 5000
+httpServer.listen(port, () => console.info(`Server is running at port ${port}`));
