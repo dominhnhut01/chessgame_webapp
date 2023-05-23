@@ -29,7 +29,7 @@ export class ServerSocket {
 
   StartListeners = (socket: Socket) => {
     console.info("Message received from " + socket.id);
-    this.aiEngine = new ChessAIEngine(2);
+    this.aiEngine = new ChessAIEngine(1);
 
     socket.on("handshake", (callback: () => void) => {
       console.info("Handshake received from: " + socket.id);

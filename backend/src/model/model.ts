@@ -248,9 +248,8 @@ class ChessAIEngine {
       : -material - positionScore;
   }
 
-  calcNextEvaluationScore(moveHistory: Move[], scoreHistory: number[]): number {
+  calcNextEvaluationScore(moveHistory: Move[]): number {
     let score = -this.curEvaluationScore;
-    const refScore = this.calcEvaluationScore(this.chess.board());
     let scores_log: number[] = [];
     for (let idx = 0; idx < moveHistory.length; idx++) {
       score = -score
@@ -325,26 +324,22 @@ class ChessAIEngine {
     beta: number,
     depth: number,
     moveHistory: Move[],
-    scoreHistory: number[]
   ): number {
     // if (depth === 0) return this.quiesce(alpha, beta);
     if (depth === 0)
-      return this.calcNextEvaluationScore(moveHistory, scoreHistory);
+      return -this.calcNextEvaluationScore(moveHistory);
     // return -alpha;
     let bestScore = -9999;
     for (let move of this.chess.moves()) {
       const next_move = this.chess.move(move);
-      scoreHistory.push(this.calcEvaluationScore(this.chess.board()));
       moveHistory.push(next_move);
       let score = -this.alphabeta(
         -beta,
         -alpha,
         depth - 1,
         moveHistory,
-        scoreHistory
       );
       this.chess.undo();
-      scoreHistory.pop();
       moveHistory.pop();
       if (score >= beta) return score;
       if (score > bestScore) bestScore = score;
@@ -365,7 +360,6 @@ class ChessAIEngine {
         -alpha,
         depth - 1,
         [next_move],
-        [this.calcEvaluationScore(this.chess.board())]
       );
 
       if (boardScore >= bestScore) {
@@ -392,7 +386,6 @@ class ChessAIEngine {
   }
 
   updatePlayerMove(playerMoveFrom: string, playerMoveTo: string): void {
-    let scoreHistory = [this.calcEvaluationScore(this.chess.board())];
     this.chess.move({
       from: playerMoveFrom,
       to: playerMoveTo,
@@ -400,8 +393,7 @@ class ChessAIEngine {
     });
 
     this.curEvaluationScore = -this.calcNextEvaluationScore(
-      [this.chess.history({ verbose: true }).pop()],
-      scoreHistory
+      [this.chess.history({ verbose: true }).pop()]
     );
   }
 }
