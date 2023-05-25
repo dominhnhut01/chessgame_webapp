@@ -244,6 +244,10 @@ class ChessAIEngine {
       : -material - positionScore;
   }
 
+  configMove(move: Move) {
+    move.promotion = "q";
+  }
+
   calcNextEvaluationScore(curScore: number, nextMove: Move): number {
     let rankFrom = nextMove.from.charAt(1) as Rank;
     let fileFrom = nextMove.from.charAt(0) as File;
@@ -288,77 +292,6 @@ class ChessAIEngine {
     return curScore;
   }
 
-  // calcNextEvaluationScore(moveHistory: Move[]): number {
-  //   let score = -this.curEvaluationScore;
-  //   let scores_log: number[] = [];
-  //   for (let idx = 0; idx < moveHistory.length; idx++) {
-  //     let move = moveHistory[idx];
-  //     //Update position score
-  //     let rankFrom = move.from.charAt(1) as Rank;
-  //     let fileFrom = move.from.charAt(0) as File;
-  //     let rankTo = move.to.charAt(1) as Rank;
-  //     let fileTo = move.to.charAt(0) as File;
-  //     if (move.color === "b") {
-  //       [rankFrom, fileFrom] = this.switchSide(rankFrom, fileFrom);
-  //       [rankTo, fileTo] = this.switchSide(rankTo, fileTo);
-  //     }
-
-  //     const pieceFrom: Piece = {
-  //       color: move.color,
-  //       pieceSymbol: move.piece,
-  //       pieceName: `${move.piece}${move.color}`,
-  //       position: {
-  //         rank: rankFrom,
-  //         file: fileFrom,
-  //       },
-  //     };
-  //     const pieceTo: Piece = {
-  //       color: move.color,
-  //       pieceSymbol: move.piece,
-  //       pieceName: `${move.piece}${move.color}`,
-  //       position: {
-  //         rank: rankTo,
-  //         file: fileTo,
-  //       },
-  //     };
-  //     const sign = move.color === "b" ? -1 : 1;
-  //     score = -score
-  //     score +=
-  //       sign *
-  //       (-this.calcPositionScore(pieceFrom) + this.calcPositionScore(pieceTo));
-
-  //     //Update material score if there is a capture
-  //     if (move.flags.includes("c") || move.flags.includes("e")) {
-  //       const capturedPieceSymbol = move.captured;
-  //       const capturedPieceWeight = this.pieceWeights.get(capturedPieceSymbol);
-  //       score += sign * capturedPieceWeight;
-  //     }
-  //     // score = sign * score;
-  //     scores_log.push(score);
-  //   }
-  //   // score = -score;
-  //   return score;
-  // }
-
-  // quiesce(alpha: number, beta: number): number {
-  //   const standPat = this.calcEvaluationScore(this.chess.board());
-
-  //   if (standPat >= beta) return beta;
-  //   if (alpha < standPat) alpha = standPat;
-
-  //   for (let move of this.chess.moves({ verbose: true })) {
-  //     if (!move.flags.includes("c")) continue;
-  //     this.chess.move(move);
-  //     let score = -this.quiesce(-beta, -alpha);
-  //     this.chess.undo();
-
-  //     if (score >= beta) return beta;
-  //     if (score > alpha) alpha = score;
-  //   }
-
-  //   return alpha;
-  // }
-
   sortPotentialMoves(moves: Move[]) {
     const boolToNumber = (value: boolean) => {
       return value ? 1 : 0;
@@ -375,14 +308,13 @@ class ChessAIEngine {
     return moves;
   }
 
-  alphabeta(
+  minimaxWithAlphaBeta(
     curScore: number,
     alpha: number,
     beta: number,
     depth: number,
     moveHistory: Move[]
   ): [number, Move] {
-    // if (depth === 0) return this.quiesce(alpha, beta);
     let bestScore = -9999;
     let bestMove: Move;
 
@@ -390,21 +322,19 @@ class ChessAIEngine {
       return [this.chess.turn() !== "w" ? 99999 : -99999, bestMove];
 
     if (depth === 0) return [-curScore, bestMove];
-    // return -alpha;
-
-    // for (let move of this.sortPotentialMoves(this.chess.moves({verbose: true}))) {
 
     let potential_moves = this.chess.moves({ verbose: true });
     if (depth >= 2) potential_moves = this.sortPotentialMoves(potential_moves);
 
     for (let move of potential_moves) {
+      this.configMove(move);
       let curScoreCopy = curScore;
       curScoreCopy = this.calcNextEvaluationScore(curScoreCopy, move);
 
       let nextMove = this.chess.move(move);
       moveHistory.push(nextMove);
       let _ : Move;
-      [curScoreCopy, _] = this.alphabeta(
+      [curScoreCopy, _] = this.minimaxWithAlphaBeta(
         -curScoreCopy,
         -beta,
         -alpha,
@@ -425,37 +355,9 @@ class ChessAIEngine {
 
     return [bestScore, bestMove];
   }
-  // findBestMove(depth: number): Move {
-  //   let bestMove: Move;
-  //   let bestScore = -99999;
-  //   let alpha = -10000;
-  //   let beta = 10000;
 
-  //   // for (let move of this.sortPotentialMoves(this.chess.moves({verbose: true}))) {
-  //   for (let move of this.chess.moves({ verbose: true })) {
-  //     const next_move = this.chess.move(move);
-  //     let boardScore = -this.alphabeta(
-  //       this.curEvaluationScore,
-  //       -beta,
-  //       -alpha,
-  //       depth - 1,
-  //       [next_move]
-  //     );
-
-  //     if (boardScore >= bestScore) {
-  //       bestScore = boardScore;
-  //       bestMove = move;
-  //     }
-  //     if (boardScore > alpha) alpha = boardScore;
-
-  //     this.chess.undo();
-  //   }
-
-  //   this.curEvaluationScore = bestScore;
-  //   return bestMove;
-  // }
   findBestMove(depth: number): Move {
-    let [bestScore, bestMove] = this.alphabeta(
+    let [bestScore, bestMove] = this.minimaxWithAlphaBeta(
       -this.curEvaluationScore,
       -10000,
       10000,
