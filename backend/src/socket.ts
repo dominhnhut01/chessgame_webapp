@@ -7,7 +7,6 @@ import { Chess } from "chess.js";
 export class ServerSocket {
   public static instance: ServerSocket;
   public io: Server;
-  private aiEngine: ChessAIEngine;
 
   /** Master list of all connected rooms */
 
@@ -29,9 +28,11 @@ export class ServerSocket {
 
   StartListeners = (socket: Socket) => {
     console.info("Message received from " + socket.id);
-    this.aiEngine = new ChessAIEngine(1);
+    let difficulty = 1;
+    let aiEngine = new ChessAIEngine(difficulty);
 
     socket.on("handshake", (callback: () => void) => {
+      
       console.info("Handshake received from: " + socket.id);
 
       console.info("Sending callback ...");
@@ -45,8 +46,8 @@ export class ServerSocket {
         playerMoveTo: string,
         computerMakeMove: (computerMove: string) => void
       ) => {
-        this.aiEngine.updatePlayerMove(playerMoveFrom, playerMoveTo);
-        const computerMove: string = this.aiEngine.computerMakingMove();
+        aiEngine.updatePlayerMove(playerMoveFrom, playerMoveTo);
+        const computerMove: string = aiEngine.computerMakingMove();
         console.log(`Computer making move: ${computerMove}`);
         computerMakeMove(computerMove);
       }
