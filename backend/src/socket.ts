@@ -33,7 +33,9 @@ export class ServerSocket {
   StartListeners = (socket: Socket) => {
     console.info("Message received from " + socket.id);
     let difficulty = 1;
-    let aiEngine = new ChessAIEngine(difficulty);
+    // let openingMovesList = ['ruy_lopez', 'italian_game', 'slav_defense'];
+    // let openingMoves = openingMovesList[Math.floor(Math.random()*openingMovesList.length)];
+    let aiEngine = new ChessAIEngine(difficulty, 'random');
 
     socket.on("handshake", (callback: () => void) => {
       console.info("Handshake received from: " + socket.id);
@@ -47,7 +49,7 @@ export class ServerSocket {
       (
         playerMoveFrom: string,
         playerMoveTo: string,
-        computerMakeMove: (computerMove: string) => void
+        computerMakeMove: (computerMove: {[key: string]: string}) => void
       ) => {
         try {
           aiEngine.updatePlayerMove(playerMoveFrom, playerMoveTo);
@@ -56,12 +58,14 @@ export class ServerSocket {
             this.emitGameOver(gameStatus, socket);
             return;
           }
-          const computerMove: string = aiEngine.computerMakingMove();
-          console.log(`Computer making move: ${computerMove}`);
+          const computerMove = aiEngine.computerMakingMove();
+          // console.log(`Computer making move: ${computerMove}`);
+          console.log(computerMove);
           computerMakeMove(computerMove);
           if (gameStatus !== "notOver") this.emitGameOver(gameStatus, socket);
         } catch (e: any) {
           console.log(aiEngine.chess.history({ verbose: true }));
+          console.log(aiEngine.chess.ascii());
         }
       }
     );

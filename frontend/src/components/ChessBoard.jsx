@@ -55,11 +55,8 @@ function ChessBoard() {
       playerMoveTo,
       (computerMove) => {
         safeGameMutate((game) => {
-          console.log(`Computer move: ${computerMove}`);
-          let move = game.move(computerMove);
-          game.undo();
-          move.promotion = "q";
-          game.move(move);
+          console.log(computerMove);
+          game.move({from: computerMove.from, to: computerMove.to, promotion: 'q'})
         });
       }
     );
@@ -79,6 +76,14 @@ function ChessBoard() {
       return;
     }
 
+    // const possibleMoves = game.moves();
+
+    // // exit if the game is over
+    // if (game.game_over() || game.in_draw() || possibleMoves.length === 0)
+    //   alert("aiWin");
+      
+    //   return;
+
     // attempt to make move
     const gameCopy = { ...game };
     const move = gameCopy.move({
@@ -93,8 +98,8 @@ function ChessBoard() {
       resetFirstMove(square);
       return;
     }
-
-    computerMakeMove(moveFrom, square);
+    setTimeout(computerMakeMove, 200, moveFrom, square);
+    // computerMakeMove(moveFrom, square);
     setMoveFrom("");
     setOptionSquares({});
   }

@@ -18,14 +18,11 @@ const SocketContextProvider = (props) => {
     );
   };
 
-  socket.on("computerMakeMove", (computerMove) => {
-
-  }) 
 
   socket.on("gameOver", (gameResult) => {
     alert(`Game Over: ${gameResult}`);
     socket.emit("disconnect");
-  }) 
+  })
 
   useEffect(() => {
     const handshake = async (socket) => {

@@ -8,6 +8,8 @@ type Square = {
   file: File;
 };
 
+type MoveSAN = string;
+
 type Piece = {
   color: Color;
   pieceSymbol: PieceSymbol;
@@ -109,14 +111,29 @@ class ChessAIEngine {
     ["q", 900],
     ["k", 2000],
   ]);
+
+  readonly openingMovesMap: Map<string, MoveSAN[]> = new Map([
+    ['italian_game', ['d5', 'Nc6', 'Bf5'].reverse()],
+    ['guy_lopez', ['d5', 'Nc6', 'Bg4'].reverse()],
+    ['slav_defense', ['e5', 'Nc6', 'f5'].reverse()],
+    ['queen_gambit', ['d5', 'c5'].reverse()],
+  ])
   minimaxSearchDepth: number;
   chess: Chess;
   curEvaluationScore: number;
+  openingMoves: MoveSAN[];
 
-  constructor(difficultyLevel: number) {
+  constructor(difficultyLevel: number, openingStrategy: string = "italian_game") {
     this.chess = new Chess();
-    this.curEvaluationScore = this.calcEvaluationScore(this.chess.board());
+    this.curEvaluationScore = 10000 + this.calcEvaluationScore(this.chess.board());
     this.minimaxSearchDepth = difficultyLevel * 2 + 1;
+
+    if (openingStrategy === 'random') {
+      let openingMovesList = Array.from(this.openingMovesMap.values());
+      this.openingMoves = openingMovesList[Math.floor(Math.random()*openingMovesList.length)];
+    } else {
+      this.openingMoves = this.openingMovesMap.get(openingStrategy);
+    }
   }
 
   switchSide(rank: Rank, file: File): [Rank, File] {
@@ -249,7 +266,9 @@ class ChessAIEngine {
     move.promotion = "q";
   }
 
-  calcNextEvaluationScore(curScore: number, nextMove: Move): number {
+  calcNextEvaluationScore(nextMove: Move): number {
+    let curScore = 0;
+
     let rankFrom = nextMove.from.charAt(1) as Rank;
     let fileFrom = nextMove.from.charAt(0) as File;
     let rankTo = nextMove.to.charAt(1) as Rank;
@@ -277,17 +296,14 @@ class ChessAIEngine {
         file: fileTo,
       },
     };
-    const sign = nextMove.color === "b" ? -1 : 1;
-    curScore = -curScore;
     curScore +=
-      sign *
       (-this.calcPositionScore(pieceFrom) + this.calcPositionScore(pieceTo));
 
     //Update material curScore if there is a capture
     if (nextMove.flags.includes("c") || nextMove.flags.includes("e")) {
       const capturedPieceSymbol = nextMove.captured;
       const capturedPieceWeight = this.pieceWeights.get(capturedPieceSymbol);
-      curScore += sign * capturedPieceWeight;
+      curScore += capturedPieceWeight;
     }
 
     return curScore;
@@ -320,9 +336,9 @@ class ChessAIEngine {
     let bestMove: Move;
 
     if (this.chess.isCheckmate())
-      return [this.chess.turn() !== "w" ? 99999 : -99999, prevMove];
+      return [99999, prevMove];
 
-    if (depth === 0) return [-curScore, prevMove];
+    if (depth === 0) return [curScore, prevMove];
 
     let potential_moves = this.chess.moves({ verbose: true });
     if (depth >= 2) potential_moves = this.sortPotentialMoves(potential_moves);
@@ -330,7 +346,7 @@ class ChessAIEngine {
     for (let move of potential_moves) {
       this.configMove(move);
       let curScoreCopy = curScore;
-      curScoreCopy = this.calcNextEvaluationScore(curScoreCopy, move);
+      curScoreCopy += this.calcNextEvaluationScore(move);
 
       let nextMove = this.chess.move(move);
       let _ : Move;
@@ -344,8 +360,8 @@ class ChessAIEngine {
       curScoreCopy = -curScoreCopy;
 
       this.chess.undo();
-      if (curScoreCopy >= beta) return [curScoreCopy, bestMove];
-      if (curScoreCopy >= bestScore) {
+      if (alpha >= beta) return [alpha, bestMove];
+      if (curScoreCopy > bestScore) {
         bestScore = curScoreCopy;
         bestMove = move;
       }
@@ -355,15 +371,15 @@ class ChessAIEngine {
     return [bestScore, bestMove];
   }
 
+
   findBestMove(depth: number): Move {
     let [bestScore, bestMove] = this.minimaxWithAlphaBeta(
       -this.curEvaluationScore,
-      -10000,
-      10000,
+      -100000,
+      100000,
       depth,
       null,
     );
-    this.curEvaluationScore = -bestScore;
 
     return bestMove;
   }
@@ -371,10 +387,21 @@ class ChessAIEngine {
    * Computer will analyze and make the best move.
    * @returns the move that computer just made
    */
-  computerMakingMove(): string {
-    let bestMove = this.findBestMove(this.minimaxSearchDepth);
-    this.chess.move(bestMove);
-    return bestMove.san;
+  computerMakingMove(): {[key: string]: string} {
+    let bestMove: Move;
+    //Perform opening move
+    if (this.openingMoves.length > 0) {
+      bestMove = this.chess.move(this.openingMoves.pop());
+
+    } else {
+      bestMove = this.findBestMove(this.minimaxSearchDepth);
+      this.chess.move(bestMove);
+    }
+    //Update score
+    this.curEvaluationScore = -(-this.curEvaluationScore + this.calcNextEvaluationScore(bestMove));
+
+    console.log(this.curEvaluationScore);
+    return {from: bestMove.from, to :bestMove.to};
   }
 
   updatePlayerMove(playerMoveFrom: string, playerMoveTo: string): void {
@@ -384,14 +411,18 @@ class ChessAIEngine {
       promotion: "q",
     });
 
-    this.curEvaluationScore = this.calcNextEvaluationScore(
-      this.curEvaluationScore,
+    this.curEvaluationScore += this.calcNextEvaluationScore(
       this.chess.history({ verbose: true }).pop()
     );
+    
+    console.log(this.curEvaluationScore);
   }
 
   checkGameStatus() : GameStatus {
-    if (this.chess.isCheckmate())
+    const possibleMovesNumber = this.chess.moves().length;
+
+
+    if (this.chess.isCheckmate() || possibleMovesNumber === 0)
       return this.chess.turn() === 'w' ? 'aiWin' : 'playerWin';
 
     else if (this.chess.isDraw())
