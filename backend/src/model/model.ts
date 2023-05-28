@@ -113,10 +113,13 @@ class ChessAIEngine {
   ]);
 
   readonly openingMovesMap: Map<string, MoveSAN[]> = new Map([
-    ['italian_game', ['d5', 'Nc6', 'Bf5'].reverse()],
+    ['italian_game', ['e5', 'Nf6', 'Bc5'].reverse()],
     ['guy_lopez', ['d5', 'Nc6', 'Bg4'].reverse()],
-    ['slav_defense', ['e5', 'Nc6', 'f5'].reverse()],
+    ['vienna_game', ['e5', 'c5'].reverse()],
     ['queen_gambit', ['d5', 'c5'].reverse()],
+    ['london_opening', ['e5', 'Nf6', 'Bc5'].reverse()],
+    ['catalan_opening', ['d5', 'c5', 'g6'].reverse()],
+    ['fried_liver', ['e5', 'Nf6', 'Bc5', 'Ng4'].reverse()]
   ])
   minimaxSearchDepth: number;
   chess: Chess;
@@ -214,10 +217,6 @@ class ChessAIEngine {
     piecesInfo: Map<string, Piece[]>
   ): number {
     //Remember that notation flips when different side
-    // const sumTable = piecesInfo.get(symbol + "w")!.reduce((curSum: number, piece) => {
-    //   const curIdx = parseInt(piece.rank) * 8 + (piece.file.charCodeAt(0) - 97);
-    //   curSum += this.pieceTables.get(symbol)![curIdx];
-    // }, [])
 
     let curSum = 0;
     if (piecesInfo.has(symbol + "w")) {

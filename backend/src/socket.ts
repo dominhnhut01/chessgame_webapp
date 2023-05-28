@@ -62,8 +62,10 @@ export class ServerSocket {
           // console.log(`Computer making move: ${computerMove}`);
           console.log(computerMove);
           computerMakeMove(computerMove);
+          gameStatus = aiEngine.checkGameStatus();
           if (gameStatus !== "notOver") this.emitGameOver(gameStatus, socket);
         } catch (e: any) {
+          console.log(e);
           console.log(aiEngine.chess.history({ verbose: true }));
           console.log(aiEngine.chess.ascii());
         }

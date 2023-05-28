@@ -21,7 +21,7 @@ const SocketContextProvider = (props) => {
 
   socket.on("gameOver", (gameResult) => {
     alert(`Game Over: ${gameResult}`);
-    socket.emit("disconnect");
+    socket.disconnect();
   })
 
   useEffect(() => {
