@@ -1,8 +1,7 @@
 import { Server as HttpServer } from "http";
 import { Socket, Server } from "socket.io";
-import { v4 } from "uuid";
-import ChessAIEngine from "./model/model";
-import { Chess } from "chess.js";
+import { ChessAIEngine, GameStatus } from "./model/model";
+import { Move } from "chess.js";
 
 export class ServerSocket {
   public static instance: ServerSocket;
@@ -11,7 +10,6 @@ export class ServerSocket {
   /** Master list of all connected rooms */
 
   constructor(server: HttpServer) {
-    
     ServerSocket.instance = this;
     this.io = new Server(server, {
       serveClient: false,
@@ -26,13 +24,18 @@ export class ServerSocket {
     this.io.on("connect", this.StartListeners);
   }
 
+  emitGameOver(gameStatus: GameStatus, socket: Socket) {
+    if (gameStatus !== "notOver") {
+      socket.emit("gameOver", gameStatus);
+    }
+  }
+
   StartListeners = (socket: Socket) => {
     console.info("Message received from " + socket.id);
     let difficulty = 1;
     let aiEngine = new ChessAIEngine(difficulty);
 
     socket.on("handshake", (callback: () => void) => {
-      
       console.info("Handshake received from: " + socket.id);
 
       console.info("Sending callback ...");
@@ -46,10 +49,20 @@ export class ServerSocket {
         playerMoveTo: string,
         computerMakeMove: (computerMove: string) => void
       ) => {
-        aiEngine.updatePlayerMove(playerMoveFrom, playerMoveTo);
-        const computerMove: string = aiEngine.computerMakingMove();
-        console.log(`Computer making move: ${computerMove}`);
-        computerMakeMove(computerMove);
+        try {
+          aiEngine.updatePlayerMove(playerMoveFrom, playerMoveTo);
+          let gameStatus = aiEngine.checkGameStatus();
+          if (gameStatus !== "notOver") {
+            this.emitGameOver(gameStatus, socket);
+            return;
+          }
+          const computerMove: string = aiEngine.computerMakingMove();
+          console.log(`Computer making move: ${computerMove}`);
+          computerMakeMove(computerMove);
+          if (gameStatus !== "notOver") this.emitGameOver(gameStatus, socket);
+        } catch (e: any) {
+          console.log(aiEngine.chess.history({ verbose: true }));
+        }
       }
     );
 

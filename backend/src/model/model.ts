@@ -14,6 +14,7 @@ type Piece = {
   pieceName: PieceName;
   position: Square;
 };
+type GameStatus = "playerWin" | "aiWin" | "draw" | "notOver";
 
 class ChessAIEngine {
   readonly pieceTables = new Map([
@@ -313,15 +314,15 @@ class ChessAIEngine {
     alpha: number,
     beta: number,
     depth: number,
-    moveHistory: Move[]
+    prevMove: Move,
   ): [number, Move] {
-    let bestScore = -9999;
+    let bestScore = -99999;
     let bestMove: Move;
 
     if (this.chess.isCheckmate())
-      return [this.chess.turn() !== "w" ? 99999 : -99999, bestMove];
+      return [this.chess.turn() !== "w" ? 99999 : -99999, prevMove];
 
-    if (depth === 0) return [-curScore, bestMove];
+    if (depth === 0) return [-curScore, prevMove];
 
     let potential_moves = this.chess.moves({ verbose: true });
     if (depth >= 2) potential_moves = this.sortPotentialMoves(potential_moves);
@@ -332,21 +333,19 @@ class ChessAIEngine {
       curScoreCopy = this.calcNextEvaluationScore(curScoreCopy, move);
 
       let nextMove = this.chess.move(move);
-      moveHistory.push(nextMove);
       let _ : Move;
       [curScoreCopy, _] = this.minimaxWithAlphaBeta(
         -curScoreCopy,
         -beta,
         -alpha,
         depth - 1,
-        moveHistory
+        nextMove,
       );
       curScoreCopy = -curScoreCopy;
 
       this.chess.undo();
-      moveHistory.pop();
       if (curScoreCopy >= beta) return [curScoreCopy, bestMove];
-      if (curScoreCopy > bestScore) {
+      if (curScoreCopy >= bestScore) {
         bestScore = curScoreCopy;
         bestMove = move;
       }
@@ -362,7 +361,7 @@ class ChessAIEngine {
       -10000,
       10000,
       depth,
-      []
+      null,
     );
     this.curEvaluationScore = -bestScore;
 
@@ -390,6 +389,16 @@ class ChessAIEngine {
       this.chess.history({ verbose: true }).pop()
     );
   }
+
+  checkGameStatus() : GameStatus {
+    if (this.chess.isCheckmate())
+      return this.chess.turn() === 'w' ? 'aiWin' : 'playerWin';
+
+    else if (this.chess.isDraw())
+      return "draw";
+    else 
+      return "notOver";
+  }
 }
 
-export default ChessAIEngine;
+export {ChessAIEngine, GameStatus };

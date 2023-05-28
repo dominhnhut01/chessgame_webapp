@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 import { socket } from "../socket";
+import { SocketContext } from "../ContextProvider/SocketContextProvider";
 
 function ChessBoard() {
-  const [isConnected, setIsConnected] = useState(socket.connected);
+  const {isConnected, playerMakeMove} = useContext(SocketContext);
 
   const [game, setGame] = useState(new Chess());
   const [moveFrom, setMoveFrom] = useState("");
@@ -49,20 +50,16 @@ function ChessBoard() {
   }
 
   function computerMakeMove(playerMoveFrom, playerMoveTo) {
-    const possibleMoves = game.moves();
-
-    // exit if the game is over
-    if (game.game_over() || game.in_draw() || possibleMoves.length === 0)
-      return;
-
-    socket.emit(
-      "playerMakeMove",
+    playerMakeMove(
       playerMoveFrom,
       playerMoveTo,
       (computerMove) => {
         safeGameMutate((game) => {
           console.log(`Computer move: ${computerMove}`);
-          game.move(computerMove);
+          let move = game.move(computerMove);
+          game.undo();
+          move.promotion = "q";
+          game.move(move);
         });
       }
     );
@@ -113,12 +110,6 @@ function ChessBoard() {
           : { backgroundColor: colour },
     });
   }
-
-  useEffect(() => {
-    socket.emit("handshake", async () => {
-      setIsConnected(true);
-    });
-  }, []);
 
   if (!isConnected) {
     return <div className="app">Loading...</div>;
