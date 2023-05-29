@@ -1,0 +1,32 @@
+.control-box {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    row-gap: 10px;
+}
+
+.history-box {
+    display: flex;
+    flex-direction: column;
+    height: 80%;
+}
+
+.button-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: auto;
+}
+.new-game-btn {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+.undo-btn {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+.scrollable-content {
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}

@@ -1,25 +1,17 @@
 import { useState, useEffect, useContext } from "react";
 import { Chessboard } from "react-chessboard";
-import { Chess } from "chess.js";
-import { socket } from "../socket";
 import { SocketContext } from "../ContextProvider/SocketContextProvider";
+import ChessCaptureBox from "./ChessCaptureBox";
+
+import { ChessContext } from "../ContextProvider/ChessContextProvider";
 
 function ChessBoard() {
-  const {isConnected, playerMakeMove} = useContext(SocketContext);
+  const {game, capturedPieces, computerMakeMove, playerMakeMove} = useContext(ChessContext);
 
-  const [game, setGame] = useState(new Chess());
   const [moveFrom, setMoveFrom] = useState("");
   const [rightClickedSquares, setRightClickedSquares] = useState({});
   const [moveSquares, setMoveSquares] = useState({});
   const [optionSquares, setOptionSquares] = useState({});
-
-  function safeGameMutate(modify) {
-    setGame((g) => {
-      const update = { ...g };
-      modify(update);
-      return update;
-    });
-  }
 
   function getMoveOptions(square) {
     const moves = game.moves({
@@ -49,19 +41,6 @@ function ChessBoard() {
     return true;
   }
 
-  function computerMakeMove(playerMoveFrom, playerMoveTo) {
-    playerMakeMove(
-      playerMoveFrom,
-      playerMoveTo,
-      (computerMove) => {
-        safeGameMutate((game) => {
-          console.log(computerMove);
-          game.move({from: computerMove.from, to: computerMove.to, promotion: 'q'})
-        });
-      }
-    );
-  }
-
   function onSquareClick(square) {
     setRightClickedSquares({});
 
@@ -76,32 +55,15 @@ function ChessBoard() {
       return;
     }
 
-    // const possibleMoves = game.moves();
-
-    // // exit if the game is over
-    // if (game.game_over() || game.in_draw() || possibleMoves.length === 0)
-    //   alert("aiWin");
-      
-    //   return;
-
-    // attempt to make move
-    const gameCopy = { ...game };
-    const move = gameCopy.move({
-      from: moveFrom,
-      to: square,
-      promotion: "q", // always promote to a queen for example simplicity
-    });
-    setGame(gameCopy);
-
-    // if invalid, setMoveFrom and getMoveOptions
-    if (move === null) {
-      resetFirstMove(square);
-      return;
-    }
-    setTimeout(computerMakeMove, 200, moveFrom, square);
-    // computerMakeMove(moveFrom, square);
-    setMoveFrom("");
-    setOptionSquares({});
+    playerMakeMove(moveFrom, square, function validateMove(validated) {
+      if (!validated) {
+        resetFirstMove(square);
+        return;
+      }
+      setTimeout(computerMakeMove, 300, moveFrom, square);
+      setMoveFrom("");
+      setOptionSquares({});
+    })
   }
 
   function onSquareRightClick(square) {
@@ -116,31 +78,26 @@ function ChessBoard() {
     });
   }
 
-  if (!isConnected) {
-    return <div className="app">Loading...</div>;
-  }
 
   return (
-    <div className="baordWrapper">
-      <Chessboard
-        id="ClickToMove"
-        animationDuration={200}
-        arePiecesDraggable={false}
-        position={game.fen()}
-        onSquareClick={onSquareClick}
-        onSquareRightClick={onSquareRightClick}
-        customBoardStyle={{
-          borderRadius: "4px",
-          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
-        }}
-        customSquareStyles={{
-          ...moveSquares,
-          ...optionSquares,
-          ...rightClickedSquares,
-        }}
-        boardWidth={400}
-      />
-    </div>
+        <Chessboard
+          id="ClickToMove"
+          animationDuration={600}
+          arePiecesDraggable={false}
+          position={game.fen()}
+          onSquareClick={onSquareClick}
+          onSquareRightClick={onSquareRightClick}
+          customBoardStyle={{
+            borderRadius: "4px",
+            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
+          }}
+          customSquareStyles={{
+            ...moveSquares,
+            ...optionSquares,
+            ...rightClickedSquares,
+          }}
+          className="chessboard"
+        />
   );
 }
 export default ChessBoard;

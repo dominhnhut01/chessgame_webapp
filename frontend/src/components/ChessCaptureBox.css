@@ -1,0 +1,10 @@
+.capturedPieces {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+}
+.capturedPiece {
+    font-size: 3.5vw;
+    font-family:Verdana, Geneva, Tahoma, sans-serif;
+}

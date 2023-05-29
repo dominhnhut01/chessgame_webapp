@@ -6,7 +6,7 @@ const SocketContext = createContext();
 const SocketContextProvider = (props) => {
   const [isConnected, setIsConnected] = useState(socket.connected);
 
-  const playerMakeMove = (playerMoveFrom, playerMoveTo, chessCallback) => {
+  const playerMakeMoveEmit = (playerMoveFrom, playerMoveTo, chessCallback) => {
     socket.emit(
       "playerMakeMove",
       playerMoveFrom,
@@ -47,7 +47,7 @@ const SocketContextProvider = (props) => {
   }, []);
 
   return (
-    <SocketContext.Provider value={{isConnected, playerMakeMove}}>
+    <SocketContext.Provider value={{isConnected, playerMakeMoveEmit}}>
       {props.children}
     </SocketContext.Provider>
   );
