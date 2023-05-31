@@ -1,15 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import "./ControlBox.css";
 import { ChessContext } from "../ContextProvider/ChessContextProvider";
+import { SocketContext } from "../ContextProvider/SocketContextProvider";
 
 function HistoryBox() {
   const { moveHistory } = useContext(ChessContext);
   const [moveHistoryProcessed, setMoveHistoryProcessed] = useState([]);
 
   useEffect(() => {
-    // console.log(moveHistory)
-    console.log("move history:");
-    console.log(moveHistory);
     let temp = [];
     for (let idx = 0; idx < moveHistory.length; idx++) {
       if (idx % 2 === 0) temp.push(`${moveHistory[idx].san}`);
@@ -19,11 +17,10 @@ function HistoryBox() {
         }`;
     }
     setMoveHistoryProcessed(temp);
+    console.log('Move history: ');
+    console.log(moveHistory);
   }, [moveHistory]);
 
-  useEffect(() => {
-    console.log(moveHistoryProcessed);
-  }, [moveHistoryProcessed]);
   return (
     <div className="scrollable-content">
       {moveHistoryProcessed.map((move, idx) => (
@@ -36,18 +33,37 @@ function HistoryBox() {
 }
 
 export default function ControlBox() {
+  const {playerUndoEmit} = useContext(SocketContext);
+  const {playerUndo, checkTurn} = useContext(ChessContext);
+  const [message, setMessage] = useState("");
+  function onClickUndoButton(evt) {
+    if (checkTurn() !== 'w') {
+      setMessage("Please wait until the computer finishes its turn");
+      setTimeout(setMessage, 1000, "");
+      return;
+    }
+    playerUndoEmit((succeed)=> {
+      if (succeed) {
+        console.log("call player undo")
+        playerUndo();
+      }
+    })
+  } 
   return (
     <div className="control-box">
       <div className="history-box">
         <HistoryBox />
       </div>
       <div className="button-box">
-        <button type="button" className="btn btn-warning undo-btn">
+        <button type="button" className="btn btn-warning undo-btn" onClick={onClickUndoButton}>
           Undo
         </button>
         <button type="button" className="btn btn-danger new-game-btn">
           New Game
         </button>
+      </div>
+      <div className="message-box">
+        {message}
       </div>
     </div>
   );

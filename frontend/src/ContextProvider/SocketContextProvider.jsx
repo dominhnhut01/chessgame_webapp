@@ -24,6 +24,12 @@ const SocketContextProvider = (props) => {
     socket.disconnect();
   })
 
+  const playerUndoEmit = (callback) => {
+    socket.emit("playerUndo", (succeed) => {
+      callback(succeed);
+    })
+  }
+
   useEffect(() => {
     const handshake = async (socket) => {
       socket.emit("handshake", async () => {
@@ -47,7 +53,7 @@ const SocketContextProvider = (props) => {
   }, []);
 
   return (
-    <SocketContext.Provider value={{isConnected, playerMakeMoveEmit}}>
+    <SocketContext.Provider value={{isConnected, playerMakeMoveEmit, playerUndoEmit}}>
       {props.children}
     </SocketContext.Provider>
   );

@@ -30,3 +30,6 @@
     overflow-x: hidden;
     overflow-y: scroll;
 }
+.message-box {
+    height: 7%;
+}

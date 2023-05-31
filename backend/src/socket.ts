@@ -66,11 +66,15 @@ export class ServerSocket {
           if (gameStatus !== "notOver") this.emitGameOver(gameStatus, socket);
         } catch (e: any) {
           console.log(e);
-          console.log(aiEngine.chess.history({ verbose: true }));
-          console.log(aiEngine.chess.ascii());
+          // console.log(aiEngine.chess.history({ verbose: true }));
+          // console.log(aiEngine.chess.ascii());
         }
       }
     );
+    socket.on("playerUndo", async (callback) => {
+      const succeed = aiEngine.playerUndo();
+      callback(succeed);
+    })
 
     socket.on("disconnect", () => {
       console.info("Disconnect received from: " + socket.id);

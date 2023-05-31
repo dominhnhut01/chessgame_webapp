@@ -19,7 +19,7 @@ type Piece = {
 type GameStatus = "playerWin" | "aiWin" | "draw" | "notOver";
 
 class ChessAIEngine {
-  readonly pieceTables = new Map([
+  private readonly pieceTables = new Map([
     [
       "p",
       [
@@ -101,9 +101,9 @@ class ChessAIEngine {
     ],
   ]);
 
-  readonly symbols: PieceSymbol[] = ["p", "n", "k", "q", "b", "r"];
-  readonly colors: Color[] = ["w", "b"];
-  readonly pieceWeights: Map<PieceSymbol, number> = new Map([
+  private readonly symbols: PieceSymbol[] = ["p", "n", "k", "q", "b", "r"];
+  private readonly colors: Color[] = ["w", "b"];
+  private readonly pieceWeights: Map<PieceSymbol, number> = new Map([
     ["p", 100],
     ["n", 320],
     ["b", 330],
@@ -112,19 +112,18 @@ class ChessAIEngine {
     ["k", 2000],
   ]);
 
-  readonly openingMovesMap: Map<string, MoveSAN[]> = new Map([
+  private readonly openingMovesMap: Map<string, MoveSAN[]> = new Map([
     ['italian_game', ['e5', 'Nf6', 'Bc5'].reverse()],
     ['guy_lopez', ['d5', 'Nc6', 'Bg4'].reverse()],
     ['vienna_game', ['e5', 'c5'].reverse()],
     ['queen_gambit', ['d5', 'c5'].reverse()],
     ['london_opening', ['e5', 'Nf6', 'Bc5'].reverse()],
     ['catalan_opening', ['d5', 'c5', 'g6'].reverse()],
-    ['fried_liver', ['e5', 'Nf6', 'Bc5', 'Ng4'].reverse()]
   ])
-  minimaxSearchDepth: number;
-  chess: Chess;
-  curEvaluationScore: number;
-  openingMoves: MoveSAN[];
+  private minimaxSearchDepth: number;
+  private chess: Chess;
+  private curEvaluationScore: number;
+  private openingMoves: MoveSAN[];
 
   constructor(difficultyLevel: number, openingStrategy: string = "italian_game") {
     this.chess = new Chess();
@@ -139,7 +138,7 @@ class ChessAIEngine {
     }
   }
 
-  switchSide(rank: Rank, file: File): [Rank, File] {
+  private switchSide(rank: Rank, file: File): [Rank, File] {
     const newRank: Rank = (9 - parseInt(rank)).toString() as Rank;
     const newFile: File = String.fromCharCode(
       7 - (file.charCodeAt(0) - 97) + 97
@@ -152,7 +151,7 @@ class ChessAIEngine {
    * @param chessBoard
    * @returns countRecord: {'chessPieceName': Piece[]}
    */
-  examineBoard(chessBoard: any[][]): Map<PieceName, Piece[]> {
+  private examineBoard(chessBoard: any[][]): Map<PieceName, Piece[]> {
     let countRecord = new Map<PieceName, Piece[]>();
     chessBoard.forEach((row) => {
       row.forEach((square) => {
@@ -206,13 +205,13 @@ class ChessAIEngine {
    * @param curPiece
    * @returns
    */
-  calcPositionScore(curPiece: Piece) {
+  private calcPositionScore(curPiece: Piece) {
     const rankDecode: number = parseInt(curPiece.position.rank) - 1;
     const fileDecode: number = curPiece.position.file.charCodeAt(0) - 97;
     return this.pieceTables.get(curPiece.pieceSymbol)![rankDecode][fileDecode];
   }
 
-  calcTotalPostionScore(
+  private calcTotalPostionScore(
     symbol: PieceSymbol,
     piecesInfo: Map<string, Piece[]>
   ): number {
@@ -237,7 +236,7 @@ class ChessAIEngine {
    * This function return the evaluation score of a specific board
    * @returns evaluation score: number
    */
-  calcEvaluationScore(chessBoard: any[][]): number {
+  private calcEvaluationScore(chessBoard: any[][]): number {
     const piecesInfo: Map<PieceName, Piece[]> = this.examineBoard(chessBoard);
     let material = 0;
     let positionScore = 0;
@@ -261,11 +260,11 @@ class ChessAIEngine {
       : -material - positionScore;
   }
 
-  configMove(move: Move) {
+  private configMove(move: Move) {
     move.promotion = "q";
   }
 
-  calcNextEvaluationScore(nextMove: Move): number {
+  private calcNextEvaluationScore(nextMove: Move): number {
     let curScore = 0;
 
     let rankFrom = nextMove.from.charAt(1) as Rank;
@@ -308,7 +307,7 @@ class ChessAIEngine {
     return curScore;
   }
 
-  sortPotentialMoves(moves: Move[]) {
+  private sortPotentialMoves(moves: Move[]) {
     const boolToNumber = (value: boolean) => {
       return value ? 1 : 0;
     };
@@ -324,7 +323,7 @@ class ChessAIEngine {
     return moves;
   }
 
-  minimaxWithAlphaBeta(
+  private minimaxWithAlphaBeta(
     curScore: number,
     alpha: number,
     beta: number,
@@ -371,7 +370,7 @@ class ChessAIEngine {
   }
 
 
-  findBestMove(depth: number): Move {
+  private findBestMove(depth: number): Move {
     let [bestScore, bestMove] = this.minimaxWithAlphaBeta(
       -this.curEvaluationScore,
       -100000,
@@ -396,6 +395,7 @@ class ChessAIEngine {
       bestMove = this.findBestMove(this.minimaxSearchDepth);
       this.chess.move(bestMove);
     }
+
     //Update score
     this.curEvaluationScore = -(-this.curEvaluationScore + this.calcNextEvaluationScore(bestMove));
 
@@ -428,6 +428,24 @@ class ChessAIEngine {
       return "draw";
     else 
       return "notOver";
+  }
+
+  playerUndo(): boolean {
+    //Undo computer move and player move
+    try {
+      this.chess.undo();
+      console.log('undo')
+      if (this.chess.turn() !== 'w')
+        this.chess.undo();
+        console.log('undo')
+      this.curEvaluationScore = 10000 + this.calcEvaluationScore(this.chess.board());
+    }
+    catch (e: any) {
+      console.log(e);
+      return false;
+    }
+    return true;
+
   }
 }
 
