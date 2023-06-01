@@ -19,10 +19,18 @@
   }
    */
 
-.chessboard {
-    padding-left: 17vh;
-    padding-right: 17vh;
+.game-container {
+  background-color: azure;
+  padding-top: 2vh;
+  padding-bottom: 2vh;
+  padding-left: 1vw;
+  padding-right: 1vw;
+}
 
-    margin-top: 1%;
-    margin-bottom: 5%;
+.chessboard {
+  padding-left: 12vh;
+  padding-right: 12vh;
+
+  margin-top: 5.2%;
+  margin-bottom: 5%;
 }

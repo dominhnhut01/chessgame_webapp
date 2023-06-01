@@ -1,35 +1,72 @@
 .control-box {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    row-gap: 10px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  row-gap: 10px;
+
+  border: 1px black solid;
+  padding-top: 2vh;
+  padding-left: 2vw;
+  padding-right: 2vw;
+
+  background-color: azure;
 }
 
 .history-box {
-    display: flex;
-    flex-direction: column;
-    height: 80%;
+  display: flex;
+  flex-direction: column;
+  height: 80%;
+  margin-bottom: 2vh;
+  border: 1px black solid;
+  /* padding: 1vw; */
+}
+
+.move-item {
+  /* border: 1px black solid; */
+  height: 3.5vh;
+
+  display: flex;
+  /* justify-content: center; */
+  padding-left: 0.3vw;
+  align-items: center;
+}
+.even {
+  background-color: rgb(200, 255, 255);
+}
+.odd {
+  background-color: azure;
 }
 
 .button-box {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: auto;
 }
 .new-game-btn {
-    margin-left: 5px;
-    margin-right: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
 }
 .undo-btn {
-    margin-left: 5px;
-    margin-right: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
 }
 .scrollable-content {
-    height: 100%;
-    overflow-x: hidden;
-    overflow-y: scroll;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 .message-box {
-    height: 7%;
+  height: 7%;
 }
+#heading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#move-history-heading {
+  padding-left: 0.3vw;
+  padding-top: 1vh;
+  font-weight: lighter;
+}
+

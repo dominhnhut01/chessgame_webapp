@@ -1,12 +1,13 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useContext } from "react";
 import { socket } from "../socket";
 
 const SocketContext = createContext();
 
 const SocketContextProvider = (props) => {
   const [isConnected, setIsConnected] = useState(socket.connected);
+  const [newGameTrigger, setNewGameTrigger] = useState(false);
 
-  const playerMakeMoveEmit = (playerMoveFrom, playerMoveTo, chessCallback) => {
+  function playerMakeMoveEmit(playerMoveFrom, playerMoveTo, chessCallback) {
     socket.emit(
       "playerMakeMove",
       playerMoveFrom,
@@ -18,17 +19,36 @@ const SocketContextProvider = (props) => {
     );
   };
 
+  
 
   socket.on("gameOver", (gameResult) => {
     alert(`Game Over: ${gameResult}`);
     socket.disconnect();
   })
 
-  const playerUndoEmit = (callback) => {
+  function playerUndoEmit(callback) {
     socket.emit("playerUndo", (succeed) => {
       callback(succeed);
     })
   }
+
+  function toggleNewGameTrigger() {
+    setNewGameTrigger(prevTrigger => {
+      return !prevTrigger;
+    })
+  }
+  function setNewGameEmit(callback) {
+    socket.emit("setNewGame", (succeed) => {
+      callback(succeed);
+    })
+  }
+
+  function setDifficultyEmit(difficulty, callback) {
+    socket.emit("setDifficulty", difficulty, (succeed) => {
+      callback(succeed);
+    })
+  }
+
 
   useEffect(() => {
     const handshake = async (socket) => {
@@ -47,13 +67,14 @@ const SocketContextProvider = (props) => {
       }
 
       setIsConnected(true);
+      toggleNewGameTrigger();
     };
 
     connectSocket();
   }, []);
 
   return (
-    <SocketContext.Provider value={{isConnected, playerMakeMoveEmit, playerUndoEmit}}>
+    <SocketContext.Provider value={{isConnected, playerMakeMoveEmit, playerUndoEmit, newGameTrigger, setNewGameEmit, setDifficultyEmit}}>
       {props.children}
     </SocketContext.Provider>
   );

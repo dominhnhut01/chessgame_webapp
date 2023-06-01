@@ -17,14 +17,17 @@ function HistoryBox() {
         }`;
     }
     setMoveHistoryProcessed(temp);
-    console.log('Move history: ');
+    console.log("Move history: ");
     console.log(moveHistory);
   }, [moveHistory]);
 
   return (
-    <div className="scrollable-content">
+    <div className="move-items">
       {moveHistoryProcessed.map((move, idx) => (
-        <div className="move-item" key={idx}>
+        <div
+          className={idx % 2 === 0 ? "move-item even" : "move-item odd"}
+          key={idx}
+        >
           {idx + 1}. {move}
         </div>
       ))}
@@ -33,38 +36,78 @@ function HistoryBox() {
 }
 
 export default function ControlBox() {
-  const {playerUndoEmit} = useContext(SocketContext);
-  const {playerUndo, checkTurn} = useContext(ChessContext);
+  const { playerUndoEmit, setNewGameEmit, setDifficultyEmit } =
+    useContext(SocketContext);
+  const { playerUndo, checkTurn, setNewGame } = useContext(ChessContext);
   const [message, setMessage] = useState("");
+
+  function difficultySelect(evt) {
+    setDifficultyEmit(parseInt(evt.target.value), (succeed) => {
+      if (!succeed) alert("Please try setting difficulty again");
+    });
+  }
   function onClickUndoButton(evt) {
-    if (checkTurn() !== 'w') {
+    if (checkTurn() !== "w") {
       setMessage("Please wait until the computer finishes its turn");
       setTimeout(setMessage, 1000, "");
       return;
     }
-    playerUndoEmit((succeed)=> {
+    playerUndoEmit((succeed) => {
       if (succeed) {
-        console.log("call player undo")
         playerUndo();
       }
-    })
-  } 
+    });
+  }
+
+  function onClickNewGameButton(evt) {
+    setNewGameEmit((succeed) => {
+      if (succeed) {
+        setNewGame();
+      }
+    });
+  }
   return (
     <div className="control-box">
-      <div className="history-box">
+      <div className="difficulty-select container-fluid">
+        <div className="row">
+          <div className="col-5" id="heading">
+            Difficulty
+          </div>
+          <div className="col-7">
+            <select
+              class="form-select"
+              aria-label="difficulty-select"
+              onChange={difficultySelect}
+            >
+              <option value="0">Easy</option>
+              <option selected value="1">
+                Medium
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <h6 id="move-history-heading">Move History</h6>
+      <div className="history-box scrollable-content">
         <HistoryBox />
       </div>
       <div className="button-box">
-        <button type="button" className="btn btn-warning undo-btn" onClick={onClickUndoButton}>
+        <button
+          type="button"
+          className="btn btn-warning undo-btn"
+          onClick={onClickUndoButton}
+        >
           Undo
         </button>
-        <button type="button" className="btn btn-danger new-game-btn">
+        <button
+          type="button"
+          className="btn btn-danger new-game-btn"
+          onClick={onClickNewGameButton}
+        >
           New Game
         </button>
       </div>
-      <div className="message-box">
-        {message}
-      </div>
+      <div className="message-box">{message}</div>
     </div>
   );
 }

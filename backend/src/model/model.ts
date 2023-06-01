@@ -124,6 +124,7 @@ class ChessAIEngine {
   private chess: Chess;
   private curEvaluationScore: number;
   private openingMoves: MoveSAN[];
+  private endOpeningMoves: boolean = false;
 
   constructor(difficultyLevel: number, openingStrategy: string = "italian_game") {
     this.chess = new Chess();
@@ -392,6 +393,7 @@ class ChessAIEngine {
       bestMove = this.chess.move(this.openingMoves.pop());
 
     } else {
+      this.endOpeningMoves = true;
       bestMove = this.findBestMove(this.minimaxSearchDepth);
       this.chess.move(bestMove);
     }
@@ -430,14 +432,21 @@ class ChessAIEngine {
       return "notOver";
   }
 
+  setMinimaxSearchDepth(difficulty: number) {
+    this.minimaxSearchDepth = difficulty * 2 + 1;
+  }
+
   playerUndo(): boolean {
     //Undo computer move and player move
     try {
-      this.chess.undo();
+      let moveUndo = this.chess.undo();
+      if (!this.endOpeningMoves)
+        this.openingMoves.push(moveUndo.san);
       console.log('undo')
-      if (this.chess.turn() !== 'w')
+      if (this.chess.turn() !== 'w') {
         this.chess.undo();
         console.log('undo')
+      }
       this.curEvaluationScore = 10000 + this.calcEvaluationScore(this.chess.board());
     }
     catch (e: any) {

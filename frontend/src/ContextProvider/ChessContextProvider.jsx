@@ -1,11 +1,11 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { SocketContext } from "./SocketContextProvider";
 import { Chess } from "chess.js";
 
 const ChessContext = createContext();
 
 const ChessContextProvider = (props) => {
-  const { playerMakeMoveEmit } = useContext(SocketContext);
+  const { playerMakeMoveEmit, newGameTrigger } = useContext(SocketContext);
   const [game, setGame] = useState(new Chess());
   const [capturedPieces, setCapturedPieces] = useState({
     black: [],
@@ -24,6 +24,18 @@ const ChessContextProvider = (props) => {
     });
   }
 
+  function setNewGame() {
+    setGame(new Chess());
+    setCapturedPieces({
+      black: [],
+      white: [],
+    });
+    setMoveHistory([]);
+  }
+  useEffect(() => {
+    setNewGame();
+  }, [newGameTrigger]);
+
   function computerMakeMove(playerMoveFrom, playerMoveTo) {
     playerMakeMoveEmit(playerMoveFrom, playerMoveTo, (computerMove) => {
       safeGameMutate(async (game) => {
@@ -38,7 +50,6 @@ const ChessContextProvider = (props) => {
         if (move.captured) {
           addCapturedPieces("white", move.captured);
         }
-
         //Update moveHistory
         updateMoveHistory(true);
       });
@@ -133,6 +144,7 @@ const ChessContextProvider = (props) => {
         playerUndo,
         moveHistory,
         checkTurn,
+        setNewGame,
       }}
     >
       {props.children}

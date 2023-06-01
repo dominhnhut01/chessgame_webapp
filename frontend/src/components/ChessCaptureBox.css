@@ -1,10 +1,14 @@
+.chess-capture-box {
+    border: 1px black solid;
+}
+
 .capturedPieces {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-
+    height: 6vh;
 }
 .capturedPiece {
-    font-size: 3.5vw;
+    font-size: 2.1vw;
     font-family:Verdana, Geneva, Tahoma, sans-serif;
 }

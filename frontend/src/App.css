@@ -2,10 +2,16 @@ html, #root, body {
   height: 100vh;
   margin: 0;
   padding: 0;
+  background-color: rgb(200, 255, 255);
 }
 
-* {
+/* * {
   border: 0.5px red solid;
+} */
+
+.app {
+  margin-top: 3vh;
+  margin-bottom: 3vh;
 }
 
 .control-box-container {

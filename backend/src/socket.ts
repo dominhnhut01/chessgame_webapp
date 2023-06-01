@@ -33,13 +33,10 @@ export class ServerSocket {
   StartListeners = (socket: Socket) => {
     console.info("Message received from " + socket.id);
     let difficulty = 1;
-    // let openingMovesList = ['ruy_lopez', 'italian_game', 'slav_defense'];
-    // let openingMoves = openingMovesList[Math.floor(Math.random()*openingMovesList.length)];
     let aiEngine = new ChessAIEngine(difficulty, 'random');
 
     socket.on("handshake", (callback: () => void) => {
       console.info("Handshake received from: " + socket.id);
-
       console.info("Sending callback ...");
       callback();
     });
@@ -71,9 +68,30 @@ export class ServerSocket {
         }
       }
     );
-    socket.on("playerUndo", async (callback) => {
+    socket.on("playerUndo", async (callback: (succeed : boolean) => void) => {
       const succeed = aiEngine.playerUndo();
       callback(succeed);
+    })
+
+    socket.on("setDifficulty", async (difficulty: number, callback: (succeed : boolean) => void) => {
+      try {
+        difficulty = difficulty;
+        aiEngine.setMinimaxSearchDepth(difficulty);
+        console.log(`Set difficulty to ${difficulty}`);
+        callback(true);
+      } catch (e : any) {
+        callback(false);
+      }
+    })
+
+    socket.on("setNewGame", async (callback: (succeed : boolean) => void) => {
+      try {
+        aiEngine = new ChessAIEngine(difficulty, 'random');
+        callback(true);
+      } catch (e: any) {
+        console.log(e);
+        callback(false);
+      }
     })
 
     socket.on("disconnect", () => {
