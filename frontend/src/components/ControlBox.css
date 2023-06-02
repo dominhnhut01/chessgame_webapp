@@ -1,15 +1,22 @@
+.control-box-container {
+  display: flex;
+  flex-direction: column;
+  row-gap: 3vh;
+}
+
 .control-box {
   display: flex;
   flex-direction: column;
   height: 100%;
   row-gap: 10px;
 
-  border: 1px black solid;
   padding-top: 2vh;
   padding-left: 2vw;
   padding-right: 2vw;
 
-  background-color: azure;
+  width: 90%;
+
+  /* background-color: azure; */
 }
 
 .history-box {
@@ -17,7 +24,6 @@
   flex-direction: column;
   height: 80%;
   margin-bottom: 2vh;
-  border: 1px black solid;
   /* padding: 1vw; */
 }
 
@@ -31,10 +37,10 @@
   align-items: center;
 }
 .even {
-  background-color: rgb(200, 255, 255);
+  background-color: white;
 }
 .odd {
-  background-color: azure;
+  background-color: rgb(241, 234, 234);
 }
 
 .button-box {
@@ -42,6 +48,8 @@
   justify-content: center;
   align-items: center;
   margin-top: auto;
+  flex-direction: row;
+  column-gap: 8%;
 }
 .new-game-btn {
   margin-left: 5px;
@@ -69,4 +77,54 @@
   padding-top: 1vh;
   font-weight: lighter;
 }
+.button {
+  border: 1px rgb(220, 220, 220) ridge;
+  box-shadow: 5px 5px 10px 1px rgb(220, 220, 220);
+  border-radius: 50%;
+}
 
+.button:hover {
+  background-color: rgb(185, 185, 185);
+}
+
+.room-link-box-wrapper {
+  padding-top: 2vh;
+  padding-bottom: 2vh;
+
+  padding-left: auto;
+  padding-right: auto;
+  width: 90%;
+
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.room-link-box {
+  padding-left: auto;
+  padding-right: auto;
+  width: 90%;
+
+  /* display: flex;
+  align-items: center;   */
+}
+
+#roomLinkTitle {
+  padding-left: auto;
+  padding-right: auto;
+}
+
+#roomLink {
+  padding: 0.5vw;
+  width: 85%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.copy-icon {
+  height: 100%;
+  width: 12%;
+  padding-left: 0.7vw;
+  padding-top: auto;
+  padding-bottom: auto;
+}

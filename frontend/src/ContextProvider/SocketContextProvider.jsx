@@ -2,10 +2,30 @@ import { createContext, useState, useEffect, useContext } from "react";
 import { socket } from "../socket";
 
 const SocketContext = createContext();
+const avatarFilePaths = [
+  "/avatar/robot1.png",
+  "/avatar/robot2.png",
+  "/avatar/robot3.png",
+  "/avatar/robot4.png",
+  "/avatar/robot5.png",
+  "/avatar/robot6.png",
+  "/avatar/robot7.png",
+];
+const selectRandom = (selectionPool) => {
+  const randomNumber = Math.floor(Math.random() * selectionPool.length);
+  return selectionPool[randomNumber];
+}
 
 const SocketContextProvider = (props) => {
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [newGameTrigger, setNewGameTrigger] = useState(false);
+  const [roomLink, setRoomLink] = useState("chess.webapp.sadafsdddddddddddddsasdadddddddddddddddddddaaaaaaaaaaa") //Set room link later by calling the backend
+
+
+  const [avatars, setAvatars] = useState({
+    black: selectRandom(avatarFilePaths),
+    white: selectRandom(avatarFilePaths),
+  })
 
   function playerMakeMoveEmit(playerMoveFrom, playerMoveTo, chessCallback) {
     socket.emit(
@@ -74,7 +94,7 @@ const SocketContextProvider = (props) => {
   }, []);
 
   return (
-    <SocketContext.Provider value={{isConnected, playerMakeMoveEmit, playerUndoEmit, newGameTrigger, setNewGameEmit, setDifficultyEmit}}>
+    <SocketContext.Provider value={{avatars, isConnected, playerMakeMoveEmit, playerUndoEmit, newGameTrigger, setNewGameEmit, setDifficultyEmit, roomLink}}>
       {props.children}
     </SocketContext.Provider>
   );

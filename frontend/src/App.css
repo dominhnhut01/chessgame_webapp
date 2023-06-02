@@ -1,8 +1,8 @@
-html, #root, body {
+body > #root {
   height: 100vh;
   margin: 0;
   padding: 0;
-  background-color: rgb(200, 255, 255);
+  background-color: white;
 }
 
 /* * {
@@ -10,15 +10,25 @@ html, #root, body {
 } */
 
 .app {
-  margin-top: 3vh;
-  margin-bottom: 3vh;
+  padding-top: 3vh;
+  padding-bottom: 3vh;
+  padding-left: 10vw;
+  padding-right: 10vw;
+  /* padding-left: 5vw;
+  padding-right: 5vw; */
 }
 
 .control-box-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 60vh;
+  height: 70vh;
   margin-top: auto;
   margin-bottom: auto;
+}
+
+.shadow-box {
+  border: 1px rgb(220, 220, 220) ridge;
+  border-radius: 8px;
+  box-shadow: 5px 5px 10px 1px rgb(220, 220, 220);
 }

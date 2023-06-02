@@ -1,14 +1,61 @@
 .chess-capture-box {
-    border: 1px black solid;
+  width: 45vw;
+  margin-left: auto;
+  margin-right: auto;
+
+  padding-left: 0.5vw;
+  padding-right: 0.5vw;
+  padding-top: 0.5vh;
+  padding-bottom: 0.5vh;
+
+  display: flex;
+  flex-direction: row;
+}
+
+.chess-capture-box-headline {
+  display: flex;
+  flex-direction: column;
+
+  font-size: 1.1vw;
+  font-weight: bold;
 }
 
 .capturedPieces {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    height: 6vh;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  height: 6vh;
+
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-left: 1vw;
+
+  padding-top: auto;
+  padding-bottom: auto;
+  padding-left: 1.5%;
+  padding-right: 1.5%;
 }
 .capturedPiece {
-    font-size: 2.1vw;
-    font-family:Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 2.1vw;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.avatar {
+  height: 10vh;
+  position: relative;
+  left: -65%;
+  top: -20%;
+  /* margin-left: -5px; */
+  /* border-radius: 50%; */
+}
+
+.avatar-wrapper {
+    position: relative;
+
+    width: 6vh;
+    height: 6vh;
+    overflow: hidden;
+    border-radius: 50%;
+    
 }

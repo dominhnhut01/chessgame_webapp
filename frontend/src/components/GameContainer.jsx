@@ -19,7 +19,7 @@ export default function GameContainer(props) {
       <ChessCaptureBox
         color={"white"}
         capturedPieces={capturedPieces.white}
-        headline={"Computer"}
+        headline={"Black"}
       />
       <div className="chessboard">
         <ChessBoard />
@@ -27,7 +27,7 @@ export default function GameContainer(props) {
       <ChessCaptureBox
         color={"black"}
         capturedPieces={capturedPieces.black}
-        headline={"Player"}
+        headline={"White"}
       />
     </div>
   );

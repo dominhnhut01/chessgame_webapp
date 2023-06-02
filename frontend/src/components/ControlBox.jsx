@@ -1,4 +1,9 @@
 import { useContext, useEffect, useState } from "react";
+
+import { BiUndo, BiRefresh } from "react-icons/bi";
+import { FiClipboard } from "react-icons/fi";
+
+
 import "./ControlBox.css";
 import { ChessContext } from "../ContextProvider/ChessContextProvider";
 import { SocketContext } from "../ContextProvider/SocketContextProvider";
@@ -35,6 +40,20 @@ function HistoryBox() {
   );
 }
 
+function RoomLinkBox() {
+  const {roomLink} = useContext(SocketContext);
+
+  return (
+    <div className="room-link-box-wrapper shadow-box">
+      <h5 id="roomLinkTitle">Invite friends to this room</h5>
+      <div className="room-link-box">
+        <input type="text" id="roomLink" className="shadow-box" value={roomLink} readOnly/>
+        <FiClipboard onClick={() =>  navigator.clipboard.writeText(roomLink)} className="copy-icon"/>
+      </div>
+    </div>
+  )
+}
+
 export default function ControlBox() {
   const { playerUndoEmit, setNewGameEmit, setDifficultyEmit } =
     useContext(SocketContext);
@@ -67,7 +86,8 @@ export default function ControlBox() {
     });
   }
   return (
-    <div className="control-box">
+    <div className="control-box-container">
+    <div className="control-box shadow-box">
       <div className="difficulty-select container-fluid">
         <div className="row">
           <div className="col-5" id="heading">
@@ -75,7 +95,7 @@ export default function ControlBox() {
           </div>
           <div className="col-7">
             <select
-              class="form-select"
+              className="form-select"
               aria-label="difficulty-select"
               onChange={difficultySelect}
             >
@@ -88,26 +108,33 @@ export default function ControlBox() {
         </div>
       </div>
       <h6 id="move-history-heading">Move History</h6>
-      <div className="history-box scrollable-content">
+      <div className="history-box scrollable-content shadow-box">
         <HistoryBox />
       </div>
       <div className="button-box">
-        <button
+        <BiUndo
           type="button"
-          className="btn btn-warning undo-btn"
+          size="3.5vh"
+          border="circle"
+          className="button"
           onClick={onClickUndoButton}
+          title="Undo"
         >
           Undo
-        </button>
-        <button
+        </BiUndo>
+        <BiRefresh
           type="button"
-          className="btn btn-danger new-game-btn"
+          size="3.5vh"
+          border="circle"
+          className="button"
           onClick={onClickNewGameButton}
-        >
-          New Game
-        </button>
+          title="New Game"
+        />
+         
       </div>
       <div className="message-box">{message}</div>
+    </div>
+    <RoomLinkBox />
     </div>
   );
 }

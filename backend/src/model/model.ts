@@ -109,7 +109,7 @@ class ChessAIEngine {
     ["b", 330],
     ["r", 500],
     ["q", 900],
-    ["k", 2000],
+    ["k", 800],
   ]);
 
   private readonly openingMovesMap: Map<string, MoveSAN[]> = new Map([
