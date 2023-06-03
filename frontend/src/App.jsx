@@ -1,35 +1,38 @@
 import "./App.css";
-import { useEffect, useState } from "react";
-import ChessBoard from "./components/ChessBoard";
-import {
-  SocketContext,
-  SocketContextProvider,
-} from "./ContextProvider/SocketContextProvider";
+import { SocketContextProvider } from "./ContextProvider/SocketContextProvider";
 import ControlBox from "./components/ControlBox";
-import ChatBox from "./components/ChatBox";
 import { ChessContextProvider } from "./ContextProvider/ChessContextProvider";
-import ChessCaptureBox from "./components/ChessCaptureBox";
 import GameContainer from "./components/GameContainer";
+import { Route, Routes } from "react-router-dom";
 
 function App() {
   return (
-    <SocketContextProvider>
-      <ChessContextProvider>
-        <div className="app container-fluid">
-          <div className="row">
-            {/* <div className="col-2">
-              <ChatBox />
-            </div> */}
-            <div className="col-8">
-              <GameContainer/>
-            </div>
-            <div className="col-4">
-              <ControlBox />
-            </div>
-          </div>
-        </div>
-      </ChessContextProvider>
-    </SocketContextProvider>
+    <Routes>
+      {["/", "/:roomID"].map((path, idx) => {
+        return (
+          <Route
+            path={path}
+            element={
+              <SocketContextProvider>
+                <ChessContextProvider>
+                  <div className="app container-fluid">
+                    <div className="row">
+                      <div className="col-8">
+                        <GameContainer />
+                      </div>
+                      <div className="col-4">
+                        <ControlBox />
+                      </div>
+                    </div>
+                  </div>
+                </ChessContextProvider>
+              </SocketContextProvider>
+            }
+            key={idx}
+          />
+        );
+      })}
+    </Routes>
   );
 }
 

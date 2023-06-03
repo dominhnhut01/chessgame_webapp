@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { socket } from "../socket";
+import { useParams } from "react-router-dom";
 
 const SocketContext = createContext();
 const avatarFilePaths = [
@@ -12,21 +13,26 @@ const avatarFilePaths = [
   "/avatar/robot7.png",
 ];
 const selectRandom = (selectionPool) => {
-  const randomNumber = Math.floor(Math.random() * selectionPool.length);
-  return selectionPool[randomNumber];
+  const randomNumber1 = Math.floor(Math.random() * selectionPool.length);
+  let randomNumber2 = randomNumber1;
+  while (randomNumber1 === randomNumber2)
+    randomNumber2 = Math.floor(Math.random() * selectionPool.length);
+  return {
+    black: selectionPool[randomNumber1],
+    white: selectionPool[randomNumber2],
+  };
 }
 
 const SocketContextProvider = (props) => {
+  const roomID = useParams().roomID;
+  const playerColor = roomID ? "black" : "white";
+
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [newGameTrigger, setNewGameTrigger] = useState(false);
-  const [roomLink, setRoomLink] = useState("chess.webapp.sadafsdddddddddddddsasdadddddddddddddddddddaaaaaaaaaaa") //Set room link later by calling the backend
+  const [roomLink, setRoomLink] = useState(roomID ? `http://localhost:5173/${roomID}` : ""); //Set room link later by calling the backend
   const [gameStatus, setGameStatus] = useState("notOver");
 
-
-  const [avatars, setAvatars] = useState({
-    black: selectRandom(avatarFilePaths),
-    white: selectRandom(avatarFilePaths),
-  })
+  const avatars = selectRandom(avatarFilePaths)
 
   function playerMakeMoveEmit(playerMoveFrom, playerMoveTo, chessCallback) {
     socket.emit(
@@ -93,7 +99,7 @@ const SocketContextProvider = (props) => {
   }, []);
 
   return (
-    <SocketContext.Provider value={{avatars, isConnected, playerMakeMoveEmit, playerUndoEmit, newGameTrigger, setNewGameEmit, setDifficultyEmit, roomLink, gameStatus}}>
+    <SocketContext.Provider value={{avatars, isConnected, playerMakeMoveEmit, playerUndoEmit, newGameTrigger, setNewGameEmit, setDifficultyEmit, roomLink, gameStatus, playerColor}}>
       {props.children}
     </SocketContext.Provider>
   );
