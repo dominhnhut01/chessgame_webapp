@@ -3,7 +3,6 @@ import { useContext, useEffect, useState } from "react";
 import { BiUndo, BiRefresh } from "react-icons/bi";
 import { FiClipboard } from "react-icons/fi";
 
-
 import "./ControlBox.css";
 import { ChessContext } from "../ContextProvider/ChessContextProvider";
 import { SocketContext } from "../ContextProvider/SocketContextProvider";
@@ -41,24 +40,40 @@ function HistoryBox() {
 }
 
 function RoomLinkBox() {
-  const {roomLink} = useContext(SocketContext);
+  const { roomLink } = useContext(SocketContext);
 
   return (
     <div className="room-link-box-wrapper shadow-box">
       <h5 id="roomLinkTitle">Invite friends to this room</h5>
       <div className="room-link-box">
-        <input type="text" id="roomLink" className="shadow-box" value={roomLink} readOnly/>
-        <FiClipboard onClick={() =>  navigator.clipboard.writeText(roomLink)} className="copy-icon"/>
+        <input
+          type="text"
+          id="roomLink"
+          className="shadow-box"
+          value={roomLink}
+          readOnly
+        />
+        <div className="copy-icon-wrapper button shadow-box">
+          <FiClipboard
+            onClick={() => navigator.clipboard.writeText(roomLink)}
+            className="copy-icon"
+            title="Copy room link"
+          />
+        </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default function ControlBox() {
-  const { playerUndoEmit, setNewGameEmit, setDifficultyEmit } =
+  const { playerUndoEmit, setNewGameEmit, setDifficultyEmit, gameStatus } =
     useContext(SocketContext);
   const { playerUndo, checkTurn, setNewGame } = useContext(ChessContext);
+
+  //Message Box
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("normal");
+  const [visibleMessageBox, setVisibleMessageBox] = useState(false);
 
   function difficultySelect(evt) {
     setDifficultyEmit(parseInt(evt.target.value), (succeed) => {
@@ -67,8 +82,13 @@ export default function ControlBox() {
   }
   function onClickUndoButton(evt) {
     if (checkTurn() !== "w") {
-      setMessage("Please wait until the computer finishes its turn");
-      setTimeout(setMessage, 1000, "");
+      setVisibleMessageBox(true);
+      setMessageType("warning");
+      setMessage("Please wait until the computer finishes its turn.");
+      setTimeout(() => {
+        setMessage("");
+        setVisibleMessageBox(false);
+      }, 1600);
       return;
     }
     playerUndoEmit((succeed) => {
@@ -85,56 +105,87 @@ export default function ControlBox() {
       }
     });
   }
+
+  useEffect(() => {
+    console.log(gameStatus);
+    switch (gameStatus) {
+      case "whiteWin":
+        setMessage("White wins! Please start a new game.");
+        setMessageType("normal");
+        setVisibleMessageBox(true);
+        break;
+      case "blackWin":
+        setMessage("Black wins! Please start a new game.");
+        setMessageType("normal");
+        setVisibleMessageBox(true);
+        break;
+      case "draw":
+        setMessage("Draw! Please start a new game.");
+        setMessageType("normal");
+        setVisibleMessageBox(true);
+        break;
+      default:
+        setMessage("");
+        setMessageType("normal");
+        setVisibleMessageBox(false);
+        break;
+    }
+  }, [gameStatus])
   return (
     <div className="control-box-container">
-    <div className="control-box shadow-box">
-      <div className="difficulty-select container-fluid">
-        <div className="row">
-          <div className="col-5" id="heading">
-            Difficulty
-          </div>
-          <div className="col-7">
-            <select
-              className="form-select"
-              aria-label="difficulty-select"
-              onChange={difficultySelect}
-            >
-              <option value="0">Easy</option>
-              <option selected value="1">
-                Medium
-              </option>
-            </select>
+      <div className="control-box shadow-box">
+        <div className="difficulty-select container-fluid">
+          <div className="row">
+            <div className="col-5" id="heading">
+              Difficulty
+            </div>
+            <div className="col-7">
+              <select
+                className="form-select"
+                aria-label="difficulty-select"
+                onChange={difficultySelect}
+              >
+                <option value="0">Easy</option>
+                <option selected value="1">
+                  Medium
+                </option>
+              </select>
+            </div>
           </div>
         </div>
+        <h6 id="move-history-heading">Move History</h6>
+        <div className="history-box shadow-box">
+          <HistoryBox />
+        </div>
+        <div className="button-box">
+          <BiUndo
+            type="button"
+            size="3.5vh"
+            border="circle"
+            className="button circle-frame"
+            onClick={onClickUndoButton}
+            title="Undo"
+          >
+            Undo
+          </BiUndo>
+          <BiRefresh
+            type="button"
+            size="3.5vh"
+            border="circle"
+            className="button circle-frame"
+            onClick={onClickNewGameButton}
+            title="New Game"
+          />
+        </div>
       </div>
-      <h6 id="move-history-heading">Move History</h6>
-      <div className="history-box scrollable-content shadow-box">
-        <HistoryBox />
-      </div>
-      <div className="button-box">
-        <BiUndo
-          type="button"
-          size="3.5vh"
-          border="circle"
-          className="button"
-          onClick={onClickUndoButton}
-          title="Undo"
-        >
-          Undo
-        </BiUndo>
-        <BiRefresh
-          type="button"
-          size="3.5vh"
-          border="circle"
-          className="button"
-          onClick={onClickNewGameButton}
-          title="New Game"
-        />
-         
-      </div>
-      <div className="message-box">{message}</div>
-    </div>
-    <RoomLinkBox />
+      <RoomLinkBox />
+      {visibleMessageBox ? messageType === "normal" ? (
+        <div className="message-box shadow-box white-background">{message}</div>
+      ) : (
+        <div className="message-box shadow-box red-background">{message}</div>
+      ) : (
+        <div className="message-box hidden">{message}</div>
+      )}
     </div>
   );
 }

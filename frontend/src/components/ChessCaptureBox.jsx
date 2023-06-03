@@ -37,8 +37,8 @@ export default function ChessCaptureBox(props) {
     <div className="chess-capture-box">
       <div className="chess-capture-box-headline">
         {props.headline}
-        <div className="avatar-wrapper">
-          <img src={avatars[props.color]} className="avatar shadow-box" />
+        <div className="avatar-wrapper shadow-box">
+          <img src={avatars[props.color]} className="avatar" />
         </div>
       </div>
       <div className="capturedPieces shadow-box">

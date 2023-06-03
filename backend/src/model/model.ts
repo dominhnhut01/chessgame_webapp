@@ -16,7 +16,7 @@ type Piece = {
   pieceName: PieceName;
   position: Square;
 };
-type GameStatus = "playerWin" | "aiWin" | "draw" | "notOver";
+type GameStatus = "whiteWin" | "blackWin" | "draw" | "notOver";
 
 class ChessAIEngine {
   private readonly pieceTables = new Map([
@@ -109,7 +109,7 @@ class ChessAIEngine {
     ["b", 330],
     ["r", 500],
     ["q", 900],
-    ["k", 800],
+    ["k", 99], //To prevent useless check
   ]);
 
   private readonly openingMovesMap: Map<string, MoveSAN[]> = new Map([
@@ -424,7 +424,7 @@ class ChessAIEngine {
 
 
     if (this.chess.isCheckmate() || possibleMovesNumber === 0)
-      return this.chess.turn() === 'w' ? 'aiWin' : 'playerWin';
+      return this.chess.turn() === 'w' ? 'blackWin' : 'whiteWin';
 
     else if (this.chess.isDraw())
       return "draw";

@@ -1,20 +1,26 @@
 .control-box-container {
   display: flex;
   flex-direction: column;
+  align-items: center;
   row-gap: 3vh;
+
+  width: 25vw;
+  padding-top: 3vh;
+  padding-bottom: 3vh;
 }
 
 .control-box {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 50vh;
   row-gap: 10px;
 
-  padding-top: 2vh;
+  padding-top: 3vh;
+  padding-bottom: 3vh;
   padding-left: 2vw;
   padding-right: 2vw;
 
-  width: 90%;
+  width: 15vw;
 
   /* background-color: azure; */
 }
@@ -22,8 +28,12 @@
 .history-box {
   display: flex;
   flex-direction: column;
-  height: 80%;
   margin-bottom: 2vh;
+  height: 66%;
+
+  overflow-x: hidden;
+  overflow-y: scroll;
+  /* overflow-y: auto; */
   /* padding: 1vw; */
 }
 
@@ -60,13 +70,10 @@
   margin-right: 5px;
 }
 .scrollable-content {
-  height: 100%;
-  overflow-x: hidden;
-  overflow-y: scroll;
+  /* height: 100%; */
+  
 }
-.message-box {
-  height: 7%;
-}
+
 #heading {
   display: flex;
   justify-content: center;
@@ -80,11 +87,15 @@
 .button {
   border: 1px rgb(220, 220, 220) ridge;
   box-shadow: 5px 5px 10px 1px rgb(220, 220, 220);
+}
+
+.circle-frame {
   border-radius: 50%;
 }
 
 .button:hover {
   background-color: rgb(185, 185, 185);
+  cursor: pointer;
 }
 
 .room-link-box-wrapper {
@@ -93,9 +104,10 @@
 
   padding-left: auto;
   padding-right: auto;
-  width: 90%;
+  width: 15vw;
 
   display: flex;
+  justify-content: center;
   align-items: center;
   flex-direction: column;
 }
@@ -105,13 +117,17 @@
   padding-right: auto;
   width: 90%;
 
-  /* display: flex;
-  align-items: center;   */
+  display: flex;
+  flex-direction: row;
+  column-gap: 0.3vw;
 }
 
 #roomLinkTitle {
   padding-left: auto;
   padding-right: auto;
+
+  text-align: center;
+  font-size: 1.3vw;
 }
 
 #roomLink {
@@ -121,10 +137,32 @@
   margin-right: auto;
 }
 
+.copy-icon-wrapper {
+  width: 15%;
+
+  display: flex;
+  justify-content: center;
+}
 .copy-icon {
   height: 100%;
-  width: 12%;
-  padding-left: 0.7vw;
-  padding-top: auto;
-  padding-bottom: auto;
+}
+
+.message-box {
+  width: 15vw;
+  height: 12vh;
+
+  padding-left: 1vw;
+  padding-right: 1vw;
+  padding-top: 2vh;
+  padding-bottom: 2vh;
+
+  font-weight: bold;
+}
+
+.red-background {
+  background-color: rgb(247, 129, 129);
+}
+
+.white-background {
+  background-color: rgb(206, 255, 132);
 }

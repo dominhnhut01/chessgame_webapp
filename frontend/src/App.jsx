@@ -23,7 +23,7 @@ function App() {
             <div className="col-8">
               <GameContainer/>
             </div>
-            <div className="control-box-container col-4">
+            <div className="col-4">
               <ControlBox />
             </div>
           </div>

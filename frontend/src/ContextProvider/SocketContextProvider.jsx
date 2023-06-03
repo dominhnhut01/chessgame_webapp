@@ -20,6 +20,7 @@ const SocketContextProvider = (props) => {
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [newGameTrigger, setNewGameTrigger] = useState(false);
   const [roomLink, setRoomLink] = useState("chess.webapp.sadafsdddddddddddddsasdadddddddddddddddddddaaaaaaaaaaa") //Set room link later by calling the backend
+  const [gameStatus, setGameStatus] = useState("notOver");
 
 
   const [avatars, setAvatars] = useState({
@@ -39,11 +40,9 @@ const SocketContextProvider = (props) => {
     );
   };
 
-  
-
   socket.on("gameOver", (gameResult) => {
-    alert(`Game Over: ${gameResult}`);
-    socket.disconnect();
+    setGameStatus(gameResult);
+    console.log(gameStatus);
   })
 
   function playerUndoEmit(callback) {
@@ -94,7 +93,7 @@ const SocketContextProvider = (props) => {
   }, []);
 
   return (
-    <SocketContext.Provider value={{avatars, isConnected, playerMakeMoveEmit, playerUndoEmit, newGameTrigger, setNewGameEmit, setDifficultyEmit, roomLink}}>
+    <SocketContext.Provider value={{avatars, isConnected, playerMakeMoveEmit, playerUndoEmit, newGameTrigger, setNewGameEmit, setDifficultyEmit, roomLink, gameStatus}}>
       {props.children}
     </SocketContext.Provider>
   );

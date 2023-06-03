@@ -42,6 +42,8 @@ function ChessBoard() {
   }
 
   function onSquareClick(square) {
+    if (game.turn() === 'b')  return;
+
     setRightClickedSquares({});
 
     function resetFirstMove(square) {
