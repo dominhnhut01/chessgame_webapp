@@ -1,11 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { SocketContext } from "./SocketContextProvider";
 import { Chess } from "chess.js";
+import ChessAndSocketEventEmitter from "./ChessAndSocketEventEmitter";
 
 const ChessContext = createContext();
 
 const ChessContextProvider = (props) => {
-  const { playerMakeMoveEmit, newGameTrigger } = useContext(SocketContext);
+  const { newGameTrigger, playerColor } = useContext(SocketContext);
   const [game, setGame] = useState(new Chess());
   const [capturedPieces, setCapturedPieces] = useState({
     black: [],
@@ -36,25 +37,30 @@ const ChessContextProvider = (props) => {
     setNewGame();
   }, [newGameTrigger]);
 
-  function computerMakeMove(playerMoveFrom, playerMoveTo) {
-    playerMakeMoveEmit(playerMoveFrom, playerMoveTo, (computerMove) => {
-      safeGameMutate(async (game) => {
-        // console.log(computerMove);
-        const move = await game.move({
-          from: computerMove.from,
-          to: computerMove.to,
-          promotion: "q",
-        });
-
-        //Update captured pieces
-        if (move.captured) {
-          addCapturedPieces("white", move.captured);
-        }
-        //Update moveHistory
-        updateMoveHistory(true);
-      });
-    });
+  function playerMakeMoveEmit(playerMoveFrom, playerMoveTo, playerColor) {
+    console.log("playerMakeMove: ChessContextProvider");
+    ChessAndSocketEventEmitter.emit("playerMakeMove", playerMoveFrom, playerMoveTo, playerColor);
   }
+
+  ChessAndSocketEventEmitter.addListener("opponentMakeMove", (opponentMoveFrom, opponentMoveTo, opponentColor) => {
+    if (opponentColor === playerColor) return;
+    safeGameMutate(async (game) => {
+      // console.log(computerMove);
+      const move = await game.move({
+        from: opponentMoveFrom,
+        to: opponentMoveTo,
+        promotion: "q",
+      });
+
+      //Update captured pieces
+      if (move.captured) {
+        addCapturedPieces("white", move.captured);
+      }
+      //Update moveHistory
+      updateMoveHistory(true);
+    });
+  })
+  
 
   function playerMakeMove(playerMoveFrom, playerMoveTo, callback) {
     safeGameMutate(async (game) => {
@@ -139,8 +145,8 @@ const ChessContextProvider = (props) => {
       value={{
         game,
         capturedPieces,
-        computerMakeMove,
         playerMakeMove,
+        playerMakeMoveEmit,
         playerUndo,
         moveHistory,
         checkTurn,

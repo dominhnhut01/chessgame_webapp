@@ -2,6 +2,8 @@ import { createContext, useState, useEffect, useContext } from "react";
 import { socket } from "../socket";
 import { useParams } from "react-router-dom";
 
+import ChessAndSocketEventEmitter from "./ChessAndSocketEventEmitter";
+
 const SocketContext = createContext();
 const avatarFilePaths = [
   "/avatar/robot1.png",
@@ -24,7 +26,8 @@ const selectRandom = (selectionPool) => {
 }
 
 const SocketContextProvider = (props) => {
-  const roomID = useParams().roomID;
+  const [roomID, setRoomID] = useState(useParams().roomID);
+  let [userID, setUserID] = useState("");
   const playerColor = roomID ? "black" : "white";
 
   const [isConnected, setIsConnected] = useState(socket.connected);
@@ -32,19 +35,49 @@ const SocketContextProvider = (props) => {
   const [roomLink, setRoomLink] = useState(roomID ? `http://localhost:5173/${roomID}` : ""); //Set room link later by calling the backend
   const [gameStatus, setGameStatus] = useState("notOver");
 
-  const avatars = selectRandom(avatarFilePaths)
+  const avatars = selectRandom(avatarFilePaths);
 
-  function playerMakeMoveEmit(playerMoveFrom, playerMoveTo, chessCallback) {
+  useEffect(() => {
+    async function handshake(socket) {
+      socket.emit("handshake", roomID, playerColor, async (userID, roomID) => {
+        console.log("Establish handshake");
+        setRoomID(roomID);
+        setUserID(userID);
+        setRoomLink(`http://localhost:5173/${roomID}`);
+      });
+    };
+
+    async function connectSocket() {
+      // Code to initialize and connect the socket
+      // Loop until socket.isConnected() returns true
+      while (!socket.connected) {
+        await handshake(socket);
+        await new Promise((resolve) => setTimeout(resolve, 3000)); // Delay for 1 second
+        console.log(isConnected);
+      }
+
+      setIsConnected(true);
+      toggleNewGameTrigger();
+    };
+
+    connectSocket();
+  }, []);
+
+  ChessAndSocketEventEmitter.on("playerMakeMove", (playerMoveFrom, playerMoveTo) => {
+    console.log("playerMakeMove: SocketContextProvider");
+    console.log(`listener number: ${ChessAndSocketEventEmitter.listenerCount("playerMakeMove")}`)
+
     socket.emit(
       "playerMakeMove",
       playerMoveFrom,
       playerMoveTo,
-      (computerMove) => {
-        console.log("Received computer move: " + computerMove)
-        chessCallback(computerMove);
-      }
-    );
-  };
+      playerColor,
+    )
+  })
+
+  socket.on("opponentMakeMove", (opponentMoveFrom, opponentMoveTo, opponentColor) => {
+    ChessAndSocketEventEmitter.emit("opponentMakeMove", opponentMoveFrom, opponentMoveTo, opponentColor);
+  })
 
   socket.on("gameOver", (gameResult) => {
     setGameStatus(gameResult);
@@ -75,31 +108,10 @@ const SocketContextProvider = (props) => {
   }
 
 
-  useEffect(() => {
-    const handshake = async (socket) => {
-      socket.emit("handshake", async () => {
-        console.log("Establish handshake");
-      });
-    };
-
-    const connectSocket = async () => {
-      // Code to initialize and connect the socket
-      // Loop until socket.isConnected() returns true
-      while (!socket.connected) {
-        await handshake(socket);
-        await new Promise((resolve) => setTimeout(resolve, 3000)); // Delay for 1 second
-        console.log(isConnected);
-      }
-
-      setIsConnected(true);
-      toggleNewGameTrigger();
-    };
-
-    connectSocket();
-  }, []);
+  
 
   return (
-    <SocketContext.Provider value={{avatars, isConnected, playerMakeMoveEmit, playerUndoEmit, newGameTrigger, setNewGameEmit, setDifficultyEmit, roomLink, gameStatus, playerColor}}>
+    <SocketContext.Provider value={{avatars, isConnected, playerUndoEmit, newGameTrigger, setNewGameEmit, setDifficultyEmit, roomLink, gameStatus, playerColor}}>
       {props.children}
     </SocketContext.Provider>
   );

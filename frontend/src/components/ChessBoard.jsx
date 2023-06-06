@@ -6,7 +6,7 @@ import ChessCaptureBox from "./ChessCaptureBox";
 import { ChessContext } from "../ContextProvider/ChessContextProvider";
 
 function ChessBoard() {
-  const {game, capturedPieces, computerMakeMove, playerMakeMove} = useContext(ChessContext);
+  const {game, capturedPieces, playerMakeMoveEmit, playerMakeMove} = useContext(ChessContext);
   const {playerColor} = useContext(SocketContext);
 
   const [moveFrom, setMoveFrom] = useState("");
@@ -43,7 +43,9 @@ function ChessBoard() {
   }
 
   function onSquareClick(square) {
-    if (playerColor !== game.turn())  return;
+    // console.log(playerColor);
+    // console.log(game.turn())
+    if ((playerColor === 'white' && game.turn() === 'b') || (playerColor === 'black' && game.turn() === 'w'))  return;
 
     setRightClickedSquares({});
 
@@ -63,7 +65,7 @@ function ChessBoard() {
         resetFirstMove(square);
         return;
       }
-      setTimeout(computerMakeMove, 300, moveFrom, square);
+      setTimeout(playerMakeMoveEmit, 300, moveFrom, square);
       setMoveFrom("");
       setOptionSquares({});
     })
