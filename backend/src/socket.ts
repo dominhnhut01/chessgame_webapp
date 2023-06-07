@@ -1,11 +1,22 @@
 import { Server as HttpServer } from "http";
 import { Socket, Server } from "socket.io";
-import { ChessAIEngine, GameStatus } from "./model/model";
-import { Move } from "chess.js";
+import { ChessAIEngine, GameStatus } from "./model/ChessAIModel";
+import { v4 as uuidv4 } from "uuid";
+import { ChessEngine } from "./model/ChessModel";
+
+type Color = "white" | "black";
 
 export class ServerSocket {
   public static instance: ServerSocket;
   public io: Server;
+
+  private roomMap: Map<
+    string,
+    {
+      white: string;
+      black: string;
+    }
+  > = new Map(); //RoomID: {black: userID, white: userID}
 
   /** Master list of all connected rooms */
 
@@ -30,59 +41,120 @@ export class ServerSocket {
     }
   }
 
+  addToRoomMap(roomID: string, userID: string, playerColor: Color) {
+    if (!this.roomMap.has(roomID))
+      this.roomMap.set(roomID, {
+        white: "",
+        black: "",
+      });
+
+    this.roomMap.get(roomID)![playerColor] = userID;
+  }
+
   StartListeners = (socket: Socket) => {
     console.info("Message received from " + socket.id);
     let difficulty = 1;
-    let aiEngine = new ChessAIEngine(difficulty, "random");
+    let chessEngine: ChessEngine | ChessAIEngine = new ChessAIEngine(
+      difficulty,
+      "random"
+    );
+    let isMultiplayerMode = false;
+    let roomID: string;
 
-    socket.on("handshake", (callback: () => void) => {
-      console.info("Handshake received from: " + socket.id);
-      console.info("Sending callback ...");
-      callback();
-    });
+    socket.on(
+      "handshake",
+      (
+        clientRoomID: string,
+        playerColor: Color,
+        callback: (userID: string, roomID: string) => void
+      ) => {
+        console.info("Handshake received from: " + socket.id);
+        
+        //If there is no clientRoomID being sent, it is not multiplayer. And otherwise
+        isMultiplayerMode = !clientRoomID ? false : true;
+        roomID = !clientRoomID ? uuidv4() : clientRoomID;
+        let clientUserID = uuidv4();
+        socket.join(roomID);
+        console.log(`RoomID: ${roomID}`);
+
+        this.addToRoomMap(roomID, clientUserID, playerColor);
+        if (playerColor === "black") {
+          isMultiplayerMode = true;
+          chessEngine = chessEngine as ChessEngine;
+        }
+
+        console.info("Sending callback ...");
+        callback(clientUserID, roomID);
+      }
+    );
 
     socket.on(
       "playerMakeMove",
-      (
-        playerMoveFrom: string,
-        playerMoveTo: string,
-        computerMakeMove: (computerMove: { [key: string]: string }) => void
-      ) => {
-        try {
-          aiEngine.updatePlayerMove(playerMoveFrom, playerMoveTo);
-          let gameStatus = aiEngine.checkGameStatus();
-          if (gameStatus !== "notOver") {
-            console.log(gameStatus);
-            this.emitGameOver(gameStatus, socket);
-            return;
-          }
-          const computerMove = aiEngine.computerMakingMove();
-          // console.log(`Computer making move: ${computerMove}`);
-          console.log(computerMove);
-          computerMakeMove(computerMove);
-          gameStatus = aiEngine.checkGameStatus();
-          if (gameStatus !== "notOver") {
-            console.log(gameStatus);
-            this.emitGameOver(gameStatus, socket);
-          }
-        } catch (e: any) {
-          console.log(e);
-          // console.log(aiEngine.chess.history({ verbose: true }));
-          // console.log(aiEngine.chess.ascii());
+      (playerMoveFrom: string, playerMoveTo: string, playerColor: Color) => {
+        console.log(
+          `player make move from ${playerMoveFrom} to ${playerMoveTo}`
+        );
+        if (isMultiplayerMode) {
+          console.log("multiplayer mode");
+          socket.emit(
+            "opponentMakeMove",
+            playerMoveFrom,
+            playerMoveTo,
+            playerColor === "black" ? "white" : "black"
+          );
+
+          return;
+        }
+        console.log("computer playing");
+        (chessEngine as ChessAIEngine).updatePlayerMove(
+          playerMoveFrom,
+          playerMoveTo
+        );
+        let [opponentMoveFrom, opponentMoveTo] = (
+          chessEngine as ChessAIEngine
+        ).computerMakingMove();
+
+        //Check game status after opponent making move
+        let gameStatus = chessEngine.checkGameStatus();
+        if (gameStatus !== "notOver") {
+          console.log(gameStatus);
+          this.emitGameOver(gameStatus, socket);
+        }
+
+        if (opponentMoveFrom && opponentMoveTo)
+          socket.emit(
+            "opponentMakeMove",
+            opponentMoveFrom,
+            opponentMoveTo,
+            "black"
+          );
+
+        gameStatus = chessEngine.checkGameStatus();
+        if (gameStatus !== "notOver") {
+          console.log(gameStatus);
+          this.emitGameOver(gameStatus, socket);
         }
       }
     );
+
     socket.on("playerUndo", async (callback: (succeed: boolean) => void) => {
-      const succeed = aiEngine.playerUndo();
-      callback(succeed);
+      if (isMultiplayerMode) callback(false);
+
+      try {
+        (chessEngine as ChessAIEngine).playerUndo();
+      } catch (e: any) {
+        callback(false);
+      }
+      callback(true);
     });
 
     socket.on(
       "setDifficulty",
       async (difficulty: number, callback: (succeed: boolean) => void) => {
+        if (isMultiplayerMode) callback(false);
         try {
           difficulty = difficulty;
-          aiEngine.setMinimaxSearchDepth(difficulty);
+          (chessEngine as ChessAIEngine).setMinimaxSearchDepth(difficulty);
           console.log(`Set difficulty to ${difficulty}`);
           callback(true);
         } catch (e: any) {
@@ -93,7 +165,7 @@ export class ServerSocket {
 
     socket.on("setNewGame", async (callback: (succeed: boolean) => void) => {
       try {
-        aiEngine = new ChessAIEngine(difficulty, "random");
+        chessEngine = new ChessAIEngine(difficulty, "random");
         callback(true);
       } catch (e: any) {
         console.log(e);

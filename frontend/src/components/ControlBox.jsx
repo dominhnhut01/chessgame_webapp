@@ -21,8 +21,8 @@ function HistoryBox() {
         }`;
     }
     setMoveHistoryProcessed(temp);
-    console.log("Move history: ");
-    console.log(moveHistory);
+    // console.log("Move history: ");
+    // console.log(moveHistory);
   }, [moveHistory]);
 
   return (
@@ -102,6 +102,9 @@ export default function ControlBox() {
     setNewGameEmit((succeed) => {
       if (succeed) {
         setNewGame();
+        setMessage("");
+        setMessageType("normal");
+        setVisibleMessageBox(false);
       }
     });
   }

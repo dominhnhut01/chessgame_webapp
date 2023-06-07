@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { SocketContext } from "./SocketContextProvider";
 import { Chess } from "chess.js";
-import ChessAndSocketEventEmitter from "./ChessAndSocketEventEmitter";
+import { ChessAndSocketEventEmitter } from "./ChessAndSocketEventEmitter";
 
 const ChessContext = createContext();
 
@@ -37,30 +37,35 @@ const ChessContextProvider = (props) => {
     setNewGame();
   }, [newGameTrigger]);
 
-  function playerMakeMoveEmit(playerMoveFrom, playerMoveTo, playerColor) {
+  function playerMakeMoveEmit(playerMoveFrom, playerMoveTo) {
     console.log("playerMakeMove: ChessContextProvider");
-    ChessAndSocketEventEmitter.emit("playerMakeMove", playerMoveFrom, playerMoveTo, playerColor);
+    console.log(`player move from ${playerMoveFrom} to ${playerMoveTo}`);
+    ChessAndSocketEventEmitter.emit("playerMakeMove", {
+      playerMoveFrom,
+      playerMoveTo,
+    });
   }
 
-  ChessAndSocketEventEmitter.addListener("opponentMakeMove", (opponentMoveFrom, opponentMoveTo, opponentColor) => {
-    if (opponentColor === playerColor) return;
-    safeGameMutate(async (game) => {
-      // console.log(computerMove);
-      const move = await game.move({
-        from: opponentMoveFrom,
-        to: opponentMoveTo,
-        promotion: "q",
-      });
+  useEffect(() => {
+    ChessAndSocketEventEmitter.on("opponentMakeMove", (data) => {
+      if (data.opponentColor === playerColor) return;
+      safeGameMutate(async (game) => {
+        // console.log(computerMove);
+        const move = await game.move({
+          from: data.opponentMoveFrom,
+          to: data.opponentMoveTo,
+          promotion: "q",
+        });
+        if (!move) return;
 
-      //Update captured pieces
-      if (move.captured) {
-        addCapturedPieces("white", move.captured);
-      }
-      //Update moveHistory
-      updateMoveHistory(true);
+        //Update captured pieces
+        if (move.captured) {
+          addCapturedPieces("white", move.captured);
+        }
+        //Update moveHistory
+      });
     });
-  })
-  
+  }, []);
 
   function playerMakeMove(playerMoveFrom, playerMoveTo, callback) {
     safeGameMutate(async (game) => {
@@ -80,7 +85,6 @@ const ChessContextProvider = (props) => {
         addCapturedPieces("black", move.captured);
       }
       //Update moveHistory
-      updateMoveHistory(true);
       callback(true);
     });
   }
@@ -96,7 +100,10 @@ const ChessContextProvider = (props) => {
   function popCapturedPieces(color) {
     return new Promise((resolve, reject) => {
       setCapturedPieces((prevCapturedPieces) => {
-        let newCapturedPieces = prevCapturedPieces[color].length > 0 ? prevCapturedPieces[color].slice(0, -1) : [...prevCapturedPieces[color]];
+        let newCapturedPieces =
+          prevCapturedPieces[color].length > 0
+            ? prevCapturedPieces[color].slice(0, -1)
+            : [...prevCapturedPieces[color]];
         return {
           ...prevCapturedPieces,
           [color]: newCapturedPieces,
@@ -125,20 +132,25 @@ const ChessContextProvider = (props) => {
     const captures = await chessUndo();
     for (const capture of captures) {
       console.log(capture.color);
-      const color = capture.color === 'w' ? 'black' : 'white';
+      const color = capture.color === "w" ? "black" : "white";
       await popCapturedPieces(color);
     }
     //Update moveHistory
-    updateMoveHistory(true);
   }
 
   function updateMoveHistory(verbose) {
+    console.log("Game History");
+    console.log(game.history({ verbose: verbose }));
     setMoveHistory(game.history({ verbose: verbose }));
   }
 
   function checkTurn() {
     return game.turn();
   }
+
+  useEffect(() => {
+    updateMoveHistory(true);
+  }, [game])
 
   return (
     <ChessContext.Provider

@@ -2,7 +2,7 @@ import { createContext, useState, useEffect, useContext } from "react";
 import { socket } from "../socket";
 import { useParams } from "react-router-dom";
 
-import ChessAndSocketEventEmitter from "./ChessAndSocketEventEmitter";
+import { ChessAndSocketEventEmitter } from "./ChessAndSocketEventEmitter";
 
 const SocketContext = createContext();
 const avatarFilePaths = [
@@ -23,7 +23,7 @@ const selectRandom = (selectionPool) => {
     black: selectionPool[randomNumber1],
     white: selectionPool[randomNumber2],
   };
-}
+};
 
 const SocketContextProvider = (props) => {
   const [roomID, setRoomID] = useState(useParams().roomID);
@@ -32,7 +32,9 @@ const SocketContextProvider = (props) => {
 
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [newGameTrigger, setNewGameTrigger] = useState(false);
-  const [roomLink, setRoomLink] = useState(roomID ? `http://localhost:5173/${roomID}` : ""); //Set room link later by calling the backend
+  const [roomLink, setRoomLink] = useState(
+    roomID ? `http://localhost:5173/${roomID}` : ""
+  ); //Set room link later by calling the backend
   const [gameStatus, setGameStatus] = useState("notOver");
 
   const avatars = selectRandom(avatarFilePaths);
@@ -41,11 +43,12 @@ const SocketContextProvider = (props) => {
     async function handshake(socket) {
       socket.emit("handshake", roomID, playerColor, async (userID, roomID) => {
         console.log("Establish handshake");
+        console.log(`Room: ${roomID}`);
         setRoomID(roomID);
         setUserID(userID);
         setRoomLink(`http://localhost:5173/${roomID}`);
       });
-    };
+    }
 
     async function connectSocket() {
       // Code to initialize and connect the socket
@@ -58,60 +61,84 @@ const SocketContextProvider = (props) => {
 
       setIsConnected(true);
       toggleNewGameTrigger();
-    };
+    }
 
     connectSocket();
   }, []);
 
-  ChessAndSocketEventEmitter.on("playerMakeMove", (playerMoveFrom, playerMoveTo) => {
-    console.log("playerMakeMove: SocketContextProvider");
-    console.log(`listener number: ${ChessAndSocketEventEmitter.listenerCount("playerMakeMove")}`)
+  useEffect(() => {
+    ChessAndSocketEventEmitter.on("playerMakeMove", (data) => {
+      console.log("playerMakeMove: SocketContextProvider");
+      console.log(
+        `listener number: ${ChessAndSocketEventEmitter.listenerCount(
+          "playerMakeMove"
+        )}`
+      );
+      console.log(
+        `player move from ${data.playerMoveFrom} to ${data.playerMoveTo}`
+      );
+      socket.emit(
+        "playerMakeMove",
+        data.playerMoveFrom,
+        data.playerMoveTo,
+        playerColor
+      );
+    });
+  }, []);
 
-    socket.emit(
-      "playerMakeMove",
-      playerMoveFrom,
-      playerMoveTo,
-      playerColor,
-    )
-  })
-
-  socket.on("opponentMakeMove", (opponentMoveFrom, opponentMoveTo, opponentColor) => {
-    ChessAndSocketEventEmitter.emit("opponentMakeMove", opponentMoveFrom, opponentMoveTo, opponentColor);
-  })
+  socket.on(
+    "opponentMakeMove",
+    (opponentMoveFrom, opponentMoveTo, opponentColor) => {
+      ChessAndSocketEventEmitter.emit("opponentMakeMove", {
+        opponentMoveFrom,
+        opponentMoveTo,
+        opponentColor,
+      });
+    }
+  );
 
   socket.on("gameOver", (gameResult) => {
     setGameStatus(gameResult);
     console.log(gameStatus);
-  })
+  });
 
   function playerUndoEmit(callback) {
     socket.emit("playerUndo", (succeed) => {
       callback(succeed);
-    })
+    });
   }
 
   function toggleNewGameTrigger() {
-    setNewGameTrigger(prevTrigger => {
+    setNewGameTrigger((prevTrigger) => {
       return !prevTrigger;
-    })
+    });
   }
   function setNewGameEmit(callback) {
     socket.emit("setNewGame", (succeed) => {
       callback(succeed);
-    })
+    });
   }
 
   function setDifficultyEmit(difficulty, callback) {
     socket.emit("setDifficulty", difficulty, (succeed) => {
       callback(succeed);
-    })
+    });
   }
 
-
-  
-
   return (
-    <SocketContext.Provider value={{avatars, isConnected, playerUndoEmit, newGameTrigger, setNewGameEmit, setDifficultyEmit, roomLink, gameStatus, playerColor}}>
+    <SocketContext.Provider
+      value={{
+        avatars,
+        isConnected,
+        playerUndoEmit,
+        newGameTrigger,
+        setNewGameEmit,
+        setDifficultyEmit,
+        roomLink,
+        gameStatus,
+        playerColor,
+      }}
+    >
       {props.children}
     </SocketContext.Provider>
   );

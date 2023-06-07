@@ -58,5 +58,5 @@ app.use((req, res, next) => {
 });
 
 /** Listen */
-const port = 4000
+const port = 3200
 httpServer.listen(port, () => console.info(`Server is running at port ${port}`));
