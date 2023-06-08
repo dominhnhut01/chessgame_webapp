@@ -48,7 +48,6 @@ const ChessContextProvider = (props) => {
 
   useEffect(() => {
     ChessAndSocketEventEmitter.on("opponentMakeMove", (data) => {
-      if (data.opponentColor === playerColor) return;
       safeGameMutate(async (game) => {
         // console.log(computerMove);
         const move = await game.move({

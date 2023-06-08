@@ -10,13 +10,17 @@ export class ServerSocket {
   public static instance: ServerSocket;
   public io: Server;
 
-  private roomMap: Map<
+  private socketsRecord: Map<
     string,
     {
-      white: string;
-      black: string;
+      roomID: string;
+      userColor: Color;
+      isInMultiplayerMode: boolean;
     }
-  > = new Map(); //RoomID: {black: userID, white: userID}
+  > = new Map(); //userID: {roomID, userColor}
+
+  private roomsRecord: Map<string, { white: string; black: string }> =
+    new Map(); //RoomID: {whiteSocketID, blackSocketID}
 
   /** Master list of all connected rooms */
 
@@ -41,14 +45,28 @@ export class ServerSocket {
     }
   }
 
-  addToRoomMap(roomID: string, userID: string, playerColor: Color) {
-    if (!this.roomMap.has(roomID))
-      this.roomMap.set(roomID, {
+  updateSocketsRecord(
+    roomID: string,
+    socketID: string,
+    playerColor: Color,
+    isInMultiplayerMode: boolean
+  ) {
+    if (!this.socketsRecord.has(socketID))
+      this.socketsRecord.set(socketID, {
+        roomID: roomID,
+        userColor: playerColor,
+        isInMultiplayerMode: isInMultiplayerMode,
+      });
+  }
+
+  udpateRoomsRecord(roomID: string, socketID: string, playerColor: Color) {
+    if (!this.roomsRecord.has(roomID))
+      this.roomsRecord.set(roomID, {
         white: "",
         black: "",
       });
 
-    this.roomMap.get(roomID)![playerColor] = userID;
+    this.roomsRecord.get(roomID)![playerColor] = socketID;
   }
 
   StartListeners = (socket: Socket) => {
@@ -65,42 +83,45 @@ export class ServerSocket {
       "handshake",
       (
         clientRoomID: string,
-        playerColor: Color,
-        callback: (userID: string, roomID: string) => void
+        callback: (roomID: string, playerColor: Color) => void
       ) => {
         console.info("Handshake received from: " + socket.id);
-        
-        //If there is no clientRoomID being sent, it is not multiplayer. And otherwise
-        isMultiplayerMode = !clientRoomID ? false : true;
-        roomID = !clientRoomID ? uuidv4() : clientRoomID;
-        let clientUserID = uuidv4();
-        socket.join(roomID);
-        console.log(`RoomID: ${roomID}`);
-
-        this.addToRoomMap(roomID, clientUserID, playerColor);
-        if (playerColor === "black") {
-          isMultiplayerMode = true;
-          chessEngine = chessEngine as ChessEngine;
+        let roomID: string = "";
+        if (!this.socketsRecord.has(socket.id) && !clientRoomID) {
+          roomID = uuidv4();
+          this.updateSocketsRecord(roomID, socket.id, "white", false);
+          this.udpateRoomsRecord(roomID, socket.id, "white");
+          callback(roomID, "white");
         }
 
-        console.info("Sending callback ...");
-        callback(clientUserID, roomID);
+        if (!this.socketsRecord.has(socket.id) && clientRoomID) {
+          roomID = clientRoomID;
+          this.updateSocketsRecord(clientRoomID, socket.id, "black", true);
+          this.udpateRoomsRecord(clientRoomID, socket.id, "black");
+          this.socketsRecord.get(
+            this.roomsRecord.get(clientRoomID)!.white
+          )!.isInMultiplayerMode = true;
+          chessEngine = chessEngine as ChessEngine;
+          callback(roomID, "black");
+        }
+        //Join room
+        socket.join(roomID.trim());
+        console.log(`RoomID: ${roomID}`);
       }
     );
-
+    
     socket.on(
       "playerMakeMove",
-      (playerMoveFrom: string, playerMoveTo: string, playerColor: Color) => {
+      (playerMoveFrom: string, playerMoveTo: string) => {
         console.log(
           `player make move from ${playerMoveFrom} to ${playerMoveTo}`
         );
-        if (isMultiplayerMode) {
+        if (this.socketsRecord.get(socket.id)) {
           console.log("multiplayer mode");
-          socket.emit(
+          socket.to(this.socketsRecord.get(socket.id)!.roomID).emit(
             "opponentMakeMove",
             playerMoveFrom,
             playerMoveTo,
-            playerColor === "black" ? "white" : "black"
           );
 
           return;
@@ -126,7 +147,6 @@ export class ServerSocket {
             "opponentMakeMove",
             opponentMoveFrom,
             opponentMoveTo,
-            "black"
           );
 
         gameStatus = chessEngine.checkGameStatus();
@@ -138,7 +158,7 @@ export class ServerSocket {
     );
 
     socket.on("playerUndo", async (callback: (succeed: boolean) => void) => {
-      if (isMultiplayerMode) callback(false);
+      if (this.socketsRecord.get(socket.id)) callback(false);
 
       try {
         (chessEngine as ChessAIEngine).playerUndo();
@@ -151,7 +171,7 @@ export class ServerSocket {
     socket.on(
       "setDifficulty",
       async (difficulty: number, callback: (succeed: boolean) => void) => {
-        if (isMultiplayerMode) callback(false);
+        if (this.socketsRecord.get(socket.id)) callback(false);
         try {
           difficulty = difficulty;
           (chessEngine as ChessAIEngine).setMinimaxSearchDepth(difficulty);

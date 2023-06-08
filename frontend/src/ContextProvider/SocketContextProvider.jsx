@@ -27,8 +27,7 @@ const selectRandom = (selectionPool) => {
 
 const SocketContextProvider = (props) => {
   const [roomID, setRoomID] = useState(useParams().roomID);
-  let [userID, setUserID] = useState("");
-  const playerColor = roomID ? "black" : "white";
+  const [playerColor, setPlayerColor] = useState("white");
 
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [newGameTrigger, setNewGameTrigger] = useState(false);
@@ -41,12 +40,13 @@ const SocketContextProvider = (props) => {
 
   useEffect(() => {
     async function handshake(socket) {
-      socket.emit("handshake", roomID, playerColor, async (userID, roomID) => {
+      socket.emit("handshake", roomID, async (roomID, playerColorReturn) => {
         console.log("Establish handshake");
         console.log(`Room: ${roomID}`);
+        if (playerColor !== playerColorReturn)
+          setPlayerColor(playerColorReturn);
         setRoomID(roomID);
-        setUserID(userID);
-        setRoomLink(`http://localhost:5173/${roomID}`);
+        setRoomLink(`http://172.25.25.157:5173/${roomID}`);
       });
     }
 
@@ -68,31 +68,30 @@ const SocketContextProvider = (props) => {
 
   useEffect(() => {
     ChessAndSocketEventEmitter.on("playerMakeMove", (data) => {
-      console.log("playerMakeMove: SocketContextProvider");
-      console.log(
-        `listener number: ${ChessAndSocketEventEmitter.listenerCount(
-          "playerMakeMove"
-        )}`
-      );
-      console.log(
-        `player move from ${data.playerMoveFrom} to ${data.playerMoveTo}`
-      );
+      // console.log("playerMakeMove: SocketContextProvider");
+      // console.log(
+      //   `listener number: ${ChessAndSocketEventEmitter.listenerCount(
+      //     "playerMakeMove"
+      //   )}`
+      // );
+      // console.log(
+      //   `player move from ${data.playerMoveFrom} to ${data.playerMoveTo}`
+      // );
       socket.emit(
         "playerMakeMove",
         data.playerMoveFrom,
         data.playerMoveTo,
-        playerColor
       );
     });
   }, []);
 
   socket.on(
     "opponentMakeMove",
-    (opponentMoveFrom, opponentMoveTo, opponentColor) => {
+    (opponentMoveFrom, opponentMoveTo) => {
+      
       ChessAndSocketEventEmitter.emit("opponentMakeMove", {
         opponentMoveFrom,
         opponentMoveTo,
-        opponentColor,
       });
     }
   );
