@@ -17,10 +17,10 @@ function App() {
                 <ChessContextProvider>
                   <div className="app container-fluid">
                     <div className="row">
-                      <div className="col-8">
+                      <div className="col-lg-8 col-md-10 col-sm-12">
                         <GameContainer />
                       </div>
-                      <div className="col-4">
+                      <div className="col-lg-4 col-md-2 col-sm-12">
                         <ControlBox />
                       </div>
                     </div>

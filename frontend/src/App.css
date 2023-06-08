@@ -1,19 +1,18 @@
 html {
-  height: 100vh;
+  height: 100%;
   margin: 0;
   padding: 0;
-  overflow-y: hidden;
 }
 body > #root {
-  height: 100vh;
+  height: 100%;
   margin: 0;
   padding: 0;
   background-color: white;
 }
 
-* {
+/* * {
   border: 0.5px red solid;
-}
+} */
 
 .app {
   padding-top: 1vh;
@@ -21,8 +20,7 @@ body > #root {
   padding-left: 10vw;
   padding-right: 10vw;
 
-  margin-top: 0;
-  margin-bottom: 0;
+  margin: 0;
   height: 100%;
   /* padding-left: 5vw;
   padding-right: 5vw; */

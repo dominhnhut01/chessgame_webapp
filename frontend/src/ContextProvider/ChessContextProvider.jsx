@@ -6,7 +6,7 @@ import { ChessAndSocketEventEmitter } from "./ChessAndSocketEventEmitter";
 const ChessContext = createContext();
 
 const ChessContextProvider = (props) => {
-  const { newGameTrigger, playerColor } = useContext(SocketContext);
+  const { playerColor } = useContext(SocketContext);
   const [game, setGame] = useState(new Chess());
   const [capturedPieces, setCapturedPieces] = useState({
     black: [],
@@ -33,9 +33,6 @@ const ChessContextProvider = (props) => {
     });
     setMoveHistory([]);
   }
-  useEffect(() => {
-    setNewGame();
-  }, [newGameTrigger]);
 
   function playerMakeMoveEmit(playerMoveFrom, playerMoveTo) {
     console.log("playerMakeMove: ChessContextProvider");
@@ -63,6 +60,9 @@ const ChessContextProvider = (props) => {
         }
         //Update moveHistory
       });
+    });
+    ChessAndSocketEventEmitter.on("setNewGame", () => {
+      setNewGame();
     });
   }, []);
 
@@ -149,7 +149,7 @@ const ChessContextProvider = (props) => {
 
   useEffect(() => {
     updateMoveHistory(true);
-  }, [game])
+  }, [game]);
 
   return (
     <ChessContext.Provider

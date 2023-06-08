@@ -41,6 +41,7 @@ class ChessEngine {
   undo(): Move | null {
     return this.chess.undo();
   }
+
 }
 
 export {

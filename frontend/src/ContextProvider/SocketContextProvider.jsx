@@ -30,7 +30,6 @@ const SocketContextProvider = (props) => {
   const [playerColor, setPlayerColor] = useState("white");
 
   const [isConnected, setIsConnected] = useState(socket.connected);
-  const [newGameTrigger, setNewGameTrigger] = useState(false);
   const [roomLink, setRoomLink] = useState(
     roomID ? `http://localhost:5173/${roomID}` : ""
   ); //Set room link later by calling the backend
@@ -39,14 +38,18 @@ const SocketContextProvider = (props) => {
   const avatars = selectRandom(avatarFilePaths);
 
   useEffect(() => {
-    async function handshake(socket) {
-      socket.emit("handshake", roomID, async (roomID, playerColorReturn) => {
-        console.log("Establish handshake");
-        console.log(`Room: ${roomID}`);
+    async function joinRoom(socket) {
+      socket.emit("joinRoom", roomID, async (succeed, roomID, playerColorReturn) => {
+        setIsConnected(succeed);
+        if (!succeed) {
+          alert("Room is full or deactivated. Please join another room!");
+          socket.disconnect();
+        }
+        console.log(`Join room: ${roomID}`);
         if (playerColor !== playerColorReturn)
           setPlayerColor(playerColorReturn);
         setRoomID(roomID);
-        setRoomLink(`http://172.25.25.157:5173/${roomID}`);
+        setRoomLink(`http://localhost:5173/${roomID}`);
       });
     }
 
@@ -54,13 +57,12 @@ const SocketContextProvider = (props) => {
       // Code to initialize and connect the socket
       // Loop until socket.isConnected() returns true
       while (!socket.connected) {
-        await handshake(socket);
-        await new Promise((resolve) => setTimeout(resolve, 3000)); // Delay for 1 second
+        await joinRoom(socket);
+        await new Promise((resolve) => setTimeout(resolve, 1500)); // Delay for 1 second
         console.log(isConnected);
       }
 
-      setIsConnected(true);
-      toggleNewGameTrigger();
+      ChessAndSocketEventEmitter.emit("setNewGame");
     }
 
     connectSocket();
@@ -96,6 +98,16 @@ const SocketContextProvider = (props) => {
     }
   );
 
+  socket.on("setNewGame", () => {
+    ChessAndSocketEventEmitter.emit("setNewGame");
+  })
+
+  function setNewGameEmit(callback) {
+    socket.emit("setNewGame", (succeed) => {
+      callback(succeed);
+    });
+  }
+
   socket.on("gameOver", (gameResult) => {
     setGameStatus(gameResult);
     console.log(gameStatus);
@@ -106,17 +118,7 @@ const SocketContextProvider = (props) => {
       callback(succeed);
     });
   }
-
-  function toggleNewGameTrigger() {
-    setNewGameTrigger((prevTrigger) => {
-      return !prevTrigger;
-    });
-  }
-  function setNewGameEmit(callback) {
-    socket.emit("setNewGame", (succeed) => {
-      callback(succeed);
-    });
-  }
+  
 
   function setDifficultyEmit(difficulty, callback) {
     socket.emit("setDifficulty", difficulty, (succeed) => {
@@ -130,7 +132,6 @@ const SocketContextProvider = (props) => {
         avatars,
         isConnected,
         playerUndoEmit,
-        newGameTrigger,
         setNewGameEmit,
         setDifficultyEmit,
         roomLink,

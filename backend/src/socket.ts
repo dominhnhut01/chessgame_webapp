@@ -19,8 +19,10 @@ export class ServerSocket {
     }
   > = new Map(); //userID: {roomID, userColor}
 
-  private roomsRecord: Map<string, { white: string; black: string }> =
-    new Map(); //RoomID: {whiteSocketID, blackSocketID}
+  private roomsRecord: Map<
+    string,
+    { white: string; black: string; numberOfPlayers: number }
+  > = new Map(); //RoomID: {whiteSocketID, blackSocketID}
 
   /** Master list of all connected rooms */
 
@@ -64,9 +66,11 @@ export class ServerSocket {
       this.roomsRecord.set(roomID, {
         white: "",
         black: "",
+        numberOfPlayers: 0,
       });
 
     this.roomsRecord.get(roomID)![playerColor] = socketID;
+    this.roomsRecord.get(roomID)!.numberOfPlayers += 1;
   }
 
   StartListeners = (socket: Socket) => {
@@ -80,49 +84,67 @@ export class ServerSocket {
     let roomID: string;
 
     socket.on(
-      "handshake",
+      "joinRoom",
       (
         clientRoomID: string,
-        callback: (roomID: string, playerColor: Color) => void
+        callback: (
+          succeed: boolean,
+          roomID: string | null,
+          playerColor: Color | null
+        ) => void
       ) => {
-        console.info("Handshake received from: " + socket.id);
-        let roomID: string = "";
+
+        //if no record about this socket and no input roomID => This is a new socket and need to create a new room
         if (!this.socketsRecord.has(socket.id) && !clientRoomID) {
           roomID = uuidv4();
           this.updateSocketsRecord(roomID, socket.id, "white", false);
           this.udpateRoomsRecord(roomID, socket.id, "white");
-          callback(roomID, "white");
+          callback(true, roomID, "white");
         }
 
+        //no record about this socket and do have input roomID => this socket want to join a room
         if (!this.socketsRecord.has(socket.id) && clientRoomID) {
           roomID = clientRoomID;
+
+          //Check if room exist and check number of player in room
+          if (
+            !this.roomsRecord.has(clientRoomID) ||
+            this.roomsRecord.get(clientRoomID)!.numberOfPlayers >= 2
+          ) {
+            callback(false, null, null);
+            return;
+          }
+
           this.updateSocketsRecord(clientRoomID, socket.id, "black", true);
           this.udpateRoomsRecord(clientRoomID, socket.id, "black");
           this.socketsRecord.get(
             this.roomsRecord.get(clientRoomID)!.white
           )!.isInMultiplayerMode = true;
-          chessEngine = chessEngine as ChessEngine;
-          callback(roomID, "black");
+
+          //Force White to reset the game when going in multiplayer mode
+          chessEngine = new ChessEngine();
+          socket.to(roomID).emit("setNewGame");
+
+          //Callback to black player socket
+          callback(true, roomID, "black");
         }
         //Join room
         socket.join(roomID.trim());
         console.log(`RoomID: ${roomID}`);
       }
     );
-    
+
     socket.on(
       "playerMakeMove",
       (playerMoveFrom: string, playerMoveTo: string) => {
         console.log(
           `player make move from ${playerMoveFrom} to ${playerMoveTo}`
         );
-        if (this.socketsRecord.get(socket.id)) {
+        if (this.socketsRecord.get(socket.id)?.isInMultiplayerMode) {
           console.log("multiplayer mode");
-          socket.to(this.socketsRecord.get(socket.id)!.roomID).emit(
-            "opponentMakeMove",
-            playerMoveFrom,
-            playerMoveTo,
-          );
+          socket
+            .to(roomID)
+            .emit("opponentMakeMove", playerMoveFrom, playerMoveTo);
 
           return;
         }
@@ -143,11 +165,7 @@ export class ServerSocket {
         }
 
         if (opponentMoveFrom && opponentMoveTo)
-          socket.emit(
-            "opponentMakeMove",
-            opponentMoveFrom,
-            opponentMoveTo,
-          );
+          socket.emit("opponentMakeMove", opponentMoveFrom, opponentMoveTo);
 
         gameStatus = chessEngine.checkGameStatus();
         if (gameStatus !== "notOver") {
@@ -158,7 +176,8 @@ export class ServerSocket {
     );
 
     socket.on("playerUndo", async (callback: (succeed: boolean) => void) => {
-      if (this.socketsRecord.get(socket.id)) callback(false);
+      if (this.socketsRecord.get(socket.id)?.isInMultiplayerMode)
+        callback(false);
 
       try {
         (chessEngine as ChessAIEngine).playerUndo();
@@ -171,7 +190,8 @@ export class ServerSocket {
     socket.on(
       "setDifficulty",
       async (difficulty: number, callback: (succeed: boolean) => void) => {
-        if (this.socketsRecord.get(socket.id)) callback(false);
+        if (this.socketsRecord.get(socket.id)?.isInMultiplayerMode)
+          callback(false);
         try {
           difficulty = difficulty;
           (chessEngine as ChessAIEngine).setMinimaxSearchDepth(difficulty);
@@ -184,17 +204,40 @@ export class ServerSocket {
     );
 
     socket.on("setNewGame", async (callback: (succeed: boolean) => void) => {
-      try {
-        chessEngine = new ChessAIEngine(difficulty, "random");
-        callback(true);
-      } catch (e: any) {
-        console.log(e);
-        callback(false);
+      if (this.socketsRecord.get(socket.id)?.isInMultiplayerMode) {
+        try {
+          chessEngine = new ChessEngine();
+          socket.to(roomID).emit("setNewGame");
+          callback(true);
+        } catch (e: any) {
+          console.log(e);
+          callback(false);
+        }
+      } else {
+        try {
+          chessEngine = new ChessAIEngine(difficulty, "random");
+          callback(true);
+        } catch (e: any) {
+          console.log(e);
+          callback(false);
+        }
       }
     });
 
     socket.on("disconnect", () => {
       console.info("Disconnect received from: " + socket.id);
+      if (this.socketsRecord.has(socket.id)) {
+        const userColor = this.socketsRecord.get(socket.id)!.userColor;
+        if (this.roomsRecord.has(roomID)) {
+          this.roomsRecord.get(roomID)![userColor] = "";
+          this.roomsRecord.get(roomID)!.numberOfPlayers -= 1;
+          if (this.roomsRecord.get(roomID)!.numberOfPlayers === 0) {
+            this.roomsRecord.delete(roomID);
+          }
+        }
+
+        this.socketsRecord.delete(socket.id);
+      }
     });
   };
 }
