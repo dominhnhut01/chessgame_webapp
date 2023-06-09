@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { socket } from "../socket";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { ChessAndSocketEventEmitter } from "./ChessAndSocketEventEmitter";
 
@@ -26,12 +26,15 @@ const selectRandom = (selectionPool) => {
 };
 
 const SocketContextProvider = (props) => {
+  const navigate = useNavigate();
+
   const [roomID, setRoomID] = useState(useParams().roomID);
   const [playerColor, setPlayerColor] = useState("white");
 
   const [isConnected, setIsConnected] = useState(socket.connected);
+  const baseLink = "http://172.25.8.251:5173/"
   const [roomLink, setRoomLink] = useState(
-    roomID ? `http://172.20.2.49:5173/${roomID}` : ""
+    roomID ? `${baseLink}${roomID}` : ""
   ); //Set room link later by calling the backend
 
   const avatars = selectRandom(avatarFilePaths);
@@ -41,14 +44,16 @@ const SocketContextProvider = (props) => {
       socket.emit("joinRoom", roomID, async (succeed, roomID, playerColorReturn) => {
         setIsConnected(succeed);
         if (!succeed) {
-          alert("Room is full or does not exist. Please join another room!");
+          alert("Room is full or does not exist! Please reload the website to continue");
           socket.disconnect();
+          ChessAndSocketEventEmitter.emit("setNewGame");
+          navigate('/');
         }
         console.log(`Join room: ${roomID}`);
         if (playerColor !== playerColorReturn)
           setPlayerColor(playerColorReturn);
         setRoomID(roomID);
-        setRoomLink(`http://172.20.2.49:5173/${roomID}`);
+        setRoomLink(`${baseLink}${roomID}`);
       });
     }
 
@@ -101,6 +106,14 @@ const SocketContextProvider = (props) => {
     ChessAndSocketEventEmitter.emit("setNewGame");
   })
 
+  socket.on("opponentDisconnected", () => {
+    alert("Opponent disconnected! Please reload the website to start a new game");
+    socket.disconnect();
+    navigate('/');
+    ChessAndSocketEventEmitter.emit("setNewGame");
+    
+  })
+
   function setNewGameEmit(callback) {
     socket.emit("setNewGame", (succeed) => {
       callback(succeed);
@@ -124,6 +137,8 @@ const SocketContextProvider = (props) => {
       callback(succeed);
     });
   }
+
+
 
   return (
     <SocketContext.Provider

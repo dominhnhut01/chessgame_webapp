@@ -1,9 +1,11 @@
 import { useContext } from "react";
 import "./ChessCaptureBox.css";
 import { SocketContext } from "../ContextProvider/SocketContextProvider";
+import { ChessContext } from "../ContextProvider/ChessContextProvider";
 
 export default function ChessCaptureBox(props) {
   const { avatars } = useContext(SocketContext);
+  const {checkTurn} = useContext(ChessContext)
 
   const chessSymbols = new Map([
     [
@@ -37,7 +39,7 @@ export default function ChessCaptureBox(props) {
     <div className="chess-capture-box">
       <div className="chess-capture-box-headline">
         {props.headline}
-        <div className="avatar-wrapper shadow-box">
+        <div className={`avatar-wrapper shadow-box ${(props.color === 'white' &&checkTurn() === 'b') || (props.color === 'black' &&checkTurn() === 'w')? "pulse" : ""}`}>
           <img src={avatars[props.color]} className="avatar" />
         </div>
       </div>

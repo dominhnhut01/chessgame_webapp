@@ -76,7 +76,7 @@ export class ServerSocket {
   StartListeners = (socket: Socket) => {
     console.info("Message received from " + socket.id);
     let difficulty = 1;
-    let chessEngine: ChessEngine | ChessAIEngine = new ChessAIEngine(
+    let chessEngine: ChessAIEngine = new ChessAIEngine(
       difficulty,
       "random"
     );
@@ -122,7 +122,6 @@ export class ServerSocket {
           )!.isInMultiplayerMode = true;
 
           //Force White to reset the game when going in multiplayer mode
-          chessEngine = new ChessEngine();
           socket.to(roomID).emit("setNewGame");
 
           //Callback to black player socket
@@ -130,26 +129,26 @@ export class ServerSocket {
         }
         //Join room
         socket.join(roomID.trim());
-        console.log(`RoomID: ${roomID}`);
+        // console.log(`RoomID: ${roomID}`);
       }
     );
 
     socket.on(
       "playerMakeMove",
       (playerMoveFrom: string, playerMoveTo: string) => {
-        console.log(
-          `player make move from ${playerMoveFrom} to ${playerMoveTo}`
-        );
+        // console.log(
+        //   `player make move from ${playerMoveFrom} to ${playerMoveTo}`
+        // );
         if (this.socketsRecord.get(socket.id)?.isInMultiplayerMode) {
-          console.log("multiplayer mode");
+          // console.log("multiplayer mode");
           socket
             .to(roomID)
             .emit("opponentMakeMove", playerMoveFrom, playerMoveTo);
 
           return;
         }
-        console.log("computer playing");
-        (chessEngine as ChessAIEngine).updatePlayerMove(
+        // console.log("computer playing");
+        chessEngine.updatePlayerMove(
           playerMoveFrom,
           playerMoveTo
         );
@@ -169,7 +168,7 @@ export class ServerSocket {
         callback(false);
 
       try {
-        (chessEngine as ChessAIEngine).playerUndo();
+        chessEngine.playerUndo();
       } catch (e: any) {
         callback(false);
       }
@@ -183,8 +182,8 @@ export class ServerSocket {
           callback(false);
         try {
           difficulty = difficulty;
-          (chessEngine as ChessAIEngine).setMinimaxSearchDepth(difficulty);
-          console.log(`Set difficulty to ${difficulty}`);
+          chessEngine.setMinimaxSearchDepth(difficulty);
+          // console.log(`Set difficulty to ${difficulty}`);
           callback(true);
         } catch (e: any) {
           callback(false);
@@ -195,11 +194,10 @@ export class ServerSocket {
     socket.on("setNewGame", async (callback: (succeed: boolean) => void) => {
       if (this.socketsRecord.get(socket.id)?.isInMultiplayerMode) {
         try {
-          chessEngine = new ChessEngine();
           socket.to(roomID).emit("setNewGame");
           callback(true);
         } catch (e: any) {
-          console.log(e);
+          // console.log(e);
           callback(false);
         }
       } else {
@@ -207,7 +205,7 @@ export class ServerSocket {
           chessEngine = new ChessAIEngine(difficulty, "random");
           callback(true);
         } catch (e: any) {
-          console.log(e);
+          // console.log(e);
           callback(false);
         }
       }
@@ -215,16 +213,11 @@ export class ServerSocket {
 
     socket.on("disconnect", () => {
       console.info("Disconnect received from: " + socket.id);
+      socket.to(roomID).emit("opponentDisconnected")
       if (this.socketsRecord.has(socket.id)) {
-        const userColor = this.socketsRecord.get(socket.id)!.userColor;
         if (this.roomsRecord.has(roomID)) {
-          this.roomsRecord.get(roomID)![userColor] = "";
-          this.roomsRecord.get(roomID)!.numberOfPlayers -= 1;
-          if (this.roomsRecord.get(roomID)!.numberOfPlayers === 0) {
             this.roomsRecord.delete(roomID);
           }
-        }
-
         this.socketsRecord.delete(socket.id);
       }
     });

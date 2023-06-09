@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 
 import { BiUndo, BiRefresh } from "react-icons/bi";
 import { FiClipboard } from "react-icons/fi";
+import { Tooltip } from "react-tooltip";
 
 import "./ControlBox.css";
 import { ChessContext } from "../ContextProvider/ChessContextProvider";
@@ -21,8 +22,6 @@ function HistoryBox() {
         }`;
     }
     setMoveHistoryProcessed(temp);
-    // console.log("Move history: ");
-    // console.log(moveHistory);
   }, [moveHistory]);
 
   return (
@@ -53,12 +52,20 @@ function RoomLinkBox() {
           value={roomLink}
           readOnly
         />
-        <div className="copy-icon-wrapper button shadow-box">
+        <div
+          className="copy-icon-wrapper button shadow-box"
+          onClick={() => navigator.clipboard.writeText(roomLink)}
+          data-tooltip-id="copy-tooltip"
+          data-tooltip-content="Copy room link"
+        >
           <FiClipboard
-            onClick={() => navigator.clipboard.writeText(roomLink)}
             className="copy-icon"
-            title="Copy room link"
+            type="button"
+            onClick={() => navigator.clipboard.writeText(roomLink)}
+            data-tooltip-id="copy-tooltip"
+            data-tooltip-content="Copy room link"
           />
+          <Tooltip id="copy-tooltip" />
         </div>
       </div>
     </div>
@@ -68,7 +75,8 @@ function RoomLinkBox() {
 export default function ControlBox() {
   const { playerUndoEmit, setNewGameEmit, setDifficultyEmit } =
     useContext(SocketContext);
-  const { playerUndo, checkTurn, setNewGame, gameStatus } = useContext(ChessContext);
+  const { playerUndo, checkTurn, setNewGame, gameStatus } =
+    useContext(ChessContext);
 
   //Message Box
   const [message, setMessage] = useState("");
@@ -133,7 +141,7 @@ export default function ControlBox() {
         setVisibleMessageBox(false);
         break;
     }
-  }, [gameStatus])
+  }, [gameStatus]);
   return (
     <div className="control-box-container">
       <div className="control-box shadow-box">
@@ -167,8 +175,8 @@ export default function ControlBox() {
             border="circle"
             className="button circle-frame"
             onClick={onClickUndoButton}
-            title="Undo"
-          >
+            data-tooltip-id="bottom-tooltip" data-tooltip-content="Undo"
+>
             Undo
           </BiUndo>
           <BiRefresh
@@ -177,15 +185,20 @@ export default function ControlBox() {
             border="circle"
             className="button circle-frame"
             onClick={onClickNewGameButton}
-            title="New Game"
+            data-tooltip-id="bottom-tooltip" data-tooltip-content="New Game"
           />
         </div>
       </div>
+      <Tooltip id="bottom-tooltip" place="bottom"/>
       <RoomLinkBox />
-      {visibleMessageBox ? messageType === "normal" ? (
-        <div className="message-box shadow-box white-background">{message}</div>
-      ) : (
-        <div className="message-box shadow-box red-background">{message}</div>
+      {visibleMessageBox ? (
+        messageType === "normal" ? (
+          <div className="message-box shadow-box white-background">
+            {message}
+          </div>
+        ) : (
+          <div className="message-box shadow-box red-background">{message}</div>
+        )
       ) : (
         <div className="message-box hidden">{message}</div>
       )}
