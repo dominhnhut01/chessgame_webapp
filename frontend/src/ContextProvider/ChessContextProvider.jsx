@@ -13,6 +13,8 @@ const ChessContextProvider = (props) => {
     white: [],
   });
   const [moveHistory, setMoveHistory] = useState([]);
+  const [gameStatus, setGameStatus] = useState("notOver");
+
 
   function safeGameMutate(modify) {
     return new Promise((resolve, reject) => {
@@ -147,8 +149,18 @@ const ChessContextProvider = (props) => {
     return game.turn();
   }
 
+  function checkGameStatus() {
+    const possibleMovesNumber = game.moves().length;
+
+    if (game.in_checkmate() || possibleMovesNumber === 0)
+      return game.turn() === "w" ? "blackWin" : "whiteWin";
+    else if (game.in_draw()) return "draw";
+    else return "notOver";
+  }
+
   useEffect(() => {
     updateMoveHistory(true);
+    setGameStatus(checkGameStatus());
   }, [game]);
 
   return (
@@ -162,6 +174,7 @@ const ChessContextProvider = (props) => {
         moveHistory,
         checkTurn,
         setNewGame,
+        gameStatus
       }}
     >
       {props.children}

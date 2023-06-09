@@ -157,21 +157,10 @@ export class ServerSocket {
           chessEngine as ChessAIEngine
         ).computerMakingMove();
 
-        //Check game status after opponent making move
-        let gameStatus = chessEngine.checkGameStatus();
-        if (gameStatus !== "notOver") {
-          console.log(gameStatus);
-          this.emitGameOver(gameStatus, socket);
-        }
+  
 
         if (opponentMoveFrom && opponentMoveTo)
           socket.emit("opponentMakeMove", opponentMoveFrom, opponentMoveTo);
-
-        gameStatus = chessEngine.checkGameStatus();
-        if (gameStatus !== "notOver") {
-          console.log(gameStatus);
-          this.emitGameOver(gameStatus, socket);
-        }
       }
     );
 

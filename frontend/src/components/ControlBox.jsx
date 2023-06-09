@@ -66,9 +66,9 @@ function RoomLinkBox() {
 }
 
 export default function ControlBox() {
-  const { playerUndoEmit, setNewGameEmit, setDifficultyEmit, gameStatus } =
+  const { playerUndoEmit, setNewGameEmit, setDifficultyEmit } =
     useContext(SocketContext);
-  const { playerUndo, checkTurn, setNewGame } = useContext(ChessContext);
+  const { playerUndo, checkTurn, setNewGame, gameStatus } = useContext(ChessContext);
 
   //Message Box
   const [message, setMessage] = useState("");

@@ -6,7 +6,7 @@ import ChessCaptureBox from "./ChessCaptureBox";
 import { ChessContext } from "../ContextProvider/ChessContextProvider";
 
 function ChessBoard() {
-  const {game, capturedPieces, playerMakeMoveEmit, playerMakeMove} = useContext(ChessContext);
+  const {game, gameStatus, capturedPieces, playerMakeMoveEmit, playerMakeMove} = useContext(ChessContext);
   const {playerColor} = useContext(SocketContext);
 
   const [moveFrom, setMoveFrom] = useState("");
@@ -65,7 +65,8 @@ function ChessBoard() {
         resetFirstMove(square);
         return;
       }
-      setTimeout(playerMakeMoveEmit, 300, moveFrom, square);
+      if (gameStatus === "notOver")
+        setTimeout(playerMakeMoveEmit, 300, moveFrom, square);
       setMoveFrom("");
       setOptionSquares({});
     })

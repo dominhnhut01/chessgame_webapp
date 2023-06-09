@@ -31,9 +31,8 @@ const SocketContextProvider = (props) => {
 
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [roomLink, setRoomLink] = useState(
-    roomID ? `http://localhost:5173/${roomID}` : ""
+    roomID ? `http://172.20.2.49:5173/${roomID}` : ""
   ); //Set room link later by calling the backend
-  const [gameStatus, setGameStatus] = useState("notOver");
 
   const avatars = selectRandom(avatarFilePaths);
 
@@ -42,14 +41,14 @@ const SocketContextProvider = (props) => {
       socket.emit("joinRoom", roomID, async (succeed, roomID, playerColorReturn) => {
         setIsConnected(succeed);
         if (!succeed) {
-          alert("Room is full or deactivated. Please join another room!");
+          alert("Room is full or does not exist. Please join another room!");
           socket.disconnect();
         }
         console.log(`Join room: ${roomID}`);
         if (playerColor !== playerColorReturn)
           setPlayerColor(playerColorReturn);
         setRoomID(roomID);
-        setRoomLink(`http://localhost:5173/${roomID}`);
+        setRoomLink(`http://172.20.2.49:5173/${roomID}`);
       });
     }
 
@@ -108,10 +107,10 @@ const SocketContextProvider = (props) => {
     });
   }
 
-  socket.on("gameOver", (gameResult) => {
-    setGameStatus(gameResult);
-    console.log(gameStatus);
-  });
+  // socket.on("gameOver", (gameResult) => {
+  //   setGameStatus(gameResult);
+  //   console.log(gameStatus);
+  // });
 
   function playerUndoEmit(callback) {
     socket.emit("playerUndo", (succeed) => {
@@ -135,7 +134,6 @@ const SocketContextProvider = (props) => {
         setNewGameEmit,
         setDifficultyEmit,
         roomLink,
-        gameStatus,
         playerColor,
       }}
     >
