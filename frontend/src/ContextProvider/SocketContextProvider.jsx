@@ -30,12 +30,12 @@ const SocketContextProvider = (props) => {
 
   const [roomID, setRoomID] = useState(useParams().roomID);
   const [playerColor, setPlayerColor] = useState("white");
-
   const [isConnected, setIsConnected] = useState(socket.connected);
-  const baseLink = "https://chessland.netlify.app/"
   const [roomLink, setRoomLink] = useState(
     roomID ? `${baseLink}${roomID}` : ""
   ); //Set room link later by calling the backend
+
+  const baseLink = "https://chessland.netlify.app/"
 
   const avatars = selectRandom(avatarFilePaths);
 

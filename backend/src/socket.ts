@@ -5,6 +5,26 @@ import { v4 as uuidv4 } from "uuid";
 import { ChessEngine } from "./model/ChessModel";
 
 type Color = "white" | "black";
+const avatarFilePaths:Array<String> = [
+  "/avatar/robot1.png",
+  "/avatar/robot2.png",
+  "/avatar/robot3.png",
+  "/avatar/robot4.png",
+  "/avatar/robot5.png",
+  "/avatar/robot6.png",
+  "/avatar/robot7.png",
+];
+
+const selectRandom = (selectionPool:Array<String>) => {
+  const randomNumber1 = Math.floor(Math.random() * selectionPool.length);
+  let randomNumber2 = randomNumber1;
+  while (randomNumber1 === randomNumber2)
+    randomNumber2 = Math.floor(Math.random() * selectionPool.length);
+  return {
+    black: selectionPool[randomNumber1],
+    white: selectionPool[randomNumber2],
+  };
+};
 
 export class ServerSocket {
   public static instance: ServerSocket;
