@@ -21,6 +21,7 @@ You can try out ChessLand by visiting our [live demo](https://chessland.netlify.
 Also, here are some real footage you can watch:
 #### Singleplayer (vs AI):
 <img src='https://github.com/dominhnhut01/chessgame_webapp/blob/main/singleplayer_demo.gif?raw=true' title='Singleplayer Demo' width='900' alt='Singleplayer Demo' />
+
 #### Multiplayer (invite your friend):
 <img src='https://github.com/dominhnhut01/chessgame_webapp/blob/main/multiplayer_demo.gif?raw=true' title='Multiplayer Demo' width='900' alt='Multiplayer Demo' />
 
