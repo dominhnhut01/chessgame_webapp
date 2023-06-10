@@ -31,6 +31,7 @@ const SocketContextProvider = (props) => {
   const [roomID, setRoomID] = useState(useParams().roomID);
   const [playerColor, setPlayerColor] = useState("white");
   const [isConnected, setIsConnected] = useState(socket.connected);
+  const [playerAvatar, setPlayerAvatar] = useState("/avatar/robot1.png");
   const [roomLink, setRoomLink] = useState(
     roomID ? `${baseLink}${roomID}` : ""
   ); //Set room link later by calling the backend
