@@ -1,3 +1,4 @@
+
 # ChessLand
 
 Welcome to ChessLand, a web application where you can play chess against AI or challenge your friends! This app provides a user-friendly interface for playing chess online, making it easy for both beginners and experienced players to enjoy the game.
@@ -19,9 +20,9 @@ Welcome to ChessLand, a web application where you can play chess against AI or c
 You can try out ChessLand by visiting our [live demo](https://chessland.netlify.app/) hosted on Linode and Netlify.
 Also, here are some real footage you can watch:
 #### Singleplayer (vs AI):
-<img src='https://github.com/dominhnhut01/chessgame_webapp/blob/main/singleplayer_demo.gif' title='Singleplayer Demo' width='' alt='Singleplayer Demo' />
+<img src='https://github.com/dominhnhut01/chessgame_webapp/blob/main/singleplayer_demo.gif?raw=true' title='Singleplayer Demo' width='900' alt='Singleplayer Demo' />
 #### Multiplayer (invite your friend):
-<img src='https://github.com/dominhnhut01/chessgame_webapp/blob/main/multiplayer_demo.gif' title='Multiplayer Demo' width='' alt='Multiplayer Demo' />
+<img src='https://github.com/dominhnhut01/chessgame_webapp/blob/main/multiplayer_demo.gif?raw=true' title='Multiplayer Demo' width='900' alt='Multiplayer Demo' />
 
 ## Technologies Used
 
