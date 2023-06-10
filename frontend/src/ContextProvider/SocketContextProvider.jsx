@@ -49,7 +49,6 @@ const SocketContextProvider = (props) => {
           ChessAndSocketEventEmitter.emit("setNewGame");
           navigate('/');
         }
-        console.log(`Join room: ${roomID}`);
         if (playerColor !== playerColorReturn)
           setPlayerColor(playerColorReturn);
         setRoomID(roomID);
@@ -63,7 +62,6 @@ const SocketContextProvider = (props) => {
       while (!socket.connected) {
         await joinRoom(socket);
         await new Promise((resolve) => setTimeout(resolve, 1500)); // Delay for 1 second
-        console.log(isConnected);
       }
 
       ChessAndSocketEventEmitter.emit("setNewGame");

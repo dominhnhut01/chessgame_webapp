@@ -118,7 +118,6 @@ export default function ControlBox() {
   }
 
   useEffect(() => {
-    console.log(gameStatus);
     switch (gameStatus) {
       case "whiteWin":
         setMessage("White wins! Please start a new game.");
