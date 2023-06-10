@@ -6,7 +6,7 @@ Welcome to ChessLand, a web application where you can play chess against AI or c
 ## Features
 
 - Play against AI: Challenge our intelligent AI opponent and improve your chess skills.
-- Play with a friend: Invite your friend to a game and play together on the same device.
+- Play with a friend: Invite your friend to a game and play together.
 - Interactive interface: Enjoy a visually appealing and intuitive user interface for a seamless gaming experience.
 - Move validation: The app ensures that all moves adhere to the rules of chess.
 - Game history: Access a log of your moves throughout the game for review and analysis.
