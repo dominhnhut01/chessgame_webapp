@@ -1,23 +1,44 @@
+.control-box-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  row-gap: 3vh;
+
+  width: 70%;
+  padding-top: 3vh;
+  padding-bottom: 3vh;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .control-box {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 50vh;
   row-gap: 10px;
 
-  border: 1px black solid;
-  padding-top: 2vh;
+  padding-top: 3vh;
+  padding-bottom: 3vh;
   padding-left: 2vw;
   padding-right: 2vw;
 
-  background-color: azure;
+  width: 100%;
+
+  /* background-color: azure; */
 }
 
 .history-box {
   display: flex;
   flex-direction: column;
-  height: 80%;
   margin-bottom: 2vh;
-  border: 1px black solid;
+  height: 66%;
+  width: 87%;
+
+  overflow-x: hidden;
+  overflow-y: scroll;
+  margin-left: auto;
+  margin-right: auto;
+  /* overflow-y: auto; */
   /* padding: 1vw; */
 }
 
@@ -31,10 +52,10 @@
   align-items: center;
 }
 .even {
-  background-color: rgb(200, 255, 255);
+  background-color: white;
 }
 .odd {
-  background-color: azure;
+  background-color: rgb(241, 234, 234);
 }
 
 .button-box {
@@ -42,6 +63,8 @@
   justify-content: center;
   align-items: center;
   margin-top: auto;
+  flex-direction: row;
+  column-gap: 8%;
 }
 .new-game-btn {
   margin-left: 5px;
@@ -51,14 +74,7 @@
   margin-left: 5px;
   margin-right: 5px;
 }
-.scrollable-content {
-  height: 100%;
-  overflow-x: hidden;
-  overflow-y: scroll;
-}
-.message-box {
-  height: 7%;
-}
+
 #heading {
   display: flex;
   justify-content: center;
@@ -68,5 +84,87 @@
   padding-left: 0.3vw;
   padding-top: 1vh;
   font-weight: lighter;
+  text-align: center;
+}
+.button {
+  border: 1px rgb(220, 220, 220) ridge;
+  box-shadow: 5px 5px 10px 1px rgb(220, 220, 220);
 }
 
+.circle-frame {
+  border-radius: 50%;
+}
+
+.button:hover {
+  background-color: rgb(185, 185, 185);
+  cursor: pointer;
+}
+
+.room-link-box-wrapper {
+  padding-top: 2vh;
+  padding-bottom: 2vh;
+
+  padding-left: auto;
+  padding-right: auto;
+  width: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.room-link-box {
+  padding-left: auto;
+  padding-right: auto;
+  width: 85%;
+
+  display: flex;
+  flex-direction: row;
+  column-gap: 0.3vw;
+}
+
+#roomLinkTitle {
+  padding-left: auto;
+  padding-right: auto;
+
+  text-align: center;
+  font-size: 1.2vw;
+}
+
+#roomLink {
+  padding: 0.5vw;
+  width: 85%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.copy-icon-wrapper {
+  width: 15%;
+
+  display: flex;
+  justify-content: center;
+}
+.copy-icon {
+  height: 100%;
+}
+
+.message-box {
+  width: 100%;
+  height: 12vh;
+
+  padding-left: 1vw;
+  padding-right: 1vw;
+  padding-top: 2vh;
+  padding-bottom: 2vh;
+
+  font-weight: bold;
+}
+
+.red-background {
+  background-color: rgb(247, 129, 129);
+}
+
+.white-background {
+  background-color: rgb(206, 255, 132);
+}

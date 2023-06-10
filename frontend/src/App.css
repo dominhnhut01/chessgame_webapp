@@ -1,8 +1,13 @@
-html, #root, body {
-  height: 100vh;
+html {
+  height: 100%;
   margin: 0;
   padding: 0;
-  background-color: rgb(200, 255, 255);
+}
+body > #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: white;
 }
 
 /* * {
@@ -10,15 +15,35 @@ html, #root, body {
 } */
 
 .app {
-  margin-top: 3vh;
-  margin-bottom: 3vh;
+  padding-top: 1vh;
+  padding-bottom: 1vh;
+  padding-left: 10vw;
+  padding-right: 10vw;
+
+  margin: 0;
+  height: 100%;
+  /* padding-left: 5vw;
+  padding-right: 5vw; */
 }
 
-.control-box-container {
-  display: flex;
-  justify-content: center;
+.height-fill {
+  height: 100vh;
+}
+
+/* .control-box-container {
   align-items: center;
-  height: 60vh;
+  height: 80vh;
   margin-top: auto;
   margin-bottom: auto;
+} */
+
+.shadow-box {
+  display: block;
+  border: 1px rgb(220, 220, 220) ridge;
+  border-radius: 8px;
+  box-shadow: 5px 5px 10px 1px rgb(220, 220, 220);
+}
+
+.hidden {
+  visibility: hidden;
 }

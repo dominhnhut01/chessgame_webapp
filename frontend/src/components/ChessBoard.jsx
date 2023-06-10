@@ -6,7 +6,8 @@ import ChessCaptureBox from "./ChessCaptureBox";
 import { ChessContext } from "../ContextProvider/ChessContextProvider";
 
 function ChessBoard() {
-  const {game, capturedPieces, computerMakeMove, playerMakeMove} = useContext(ChessContext);
+  const {game, gameStatus, capturedPieces, playerMakeMoveEmit, playerMakeMove} = useContext(ChessContext);
+  const {playerColor} = useContext(SocketContext);
 
   const [moveFrom, setMoveFrom] = useState("");
   const [rightClickedSquares, setRightClickedSquares] = useState({});
@@ -42,6 +43,10 @@ function ChessBoard() {
   }
 
   function onSquareClick(square) {
+    // console.log(playerColor);
+    // console.log(game.turn())
+    if ((playerColor === 'white' && game.turn() === 'b') || (playerColor === 'black' && game.turn() === 'w'))  return;
+
     setRightClickedSquares({});
 
     function resetFirstMove(square) {
@@ -60,7 +65,8 @@ function ChessBoard() {
         resetFirstMove(square);
         return;
       }
-      setTimeout(computerMakeMove, 300, moveFrom, square);
+      if (gameStatus === "notOver")
+        setTimeout(playerMakeMoveEmit, 300, moveFrom, square);
       setMoveFrom("");
       setOptionSquares({});
     })
@@ -82,6 +88,7 @@ function ChessBoard() {
   return (
         <Chessboard
           id="ClickToMove"
+          boardOrientation={playerColor}
           animationDuration={600}
           arePiecesDraggable={false}
           position={game.fen()}

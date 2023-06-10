@@ -1,17 +1,20 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { SocketContext } from "./SocketContextProvider";
 import { Chess } from "chess.js";
+import { ChessAndSocketEventEmitter } from "./ChessAndSocketEventEmitter";
 
 const ChessContext = createContext();
 
 const ChessContextProvider = (props) => {
-  const { playerMakeMoveEmit, newGameTrigger } = useContext(SocketContext);
+  const { playerColor } = useContext(SocketContext);
   const [game, setGame] = useState(new Chess());
   const [capturedPieces, setCapturedPieces] = useState({
     black: [],
     white: [],
   });
   const [moveHistory, setMoveHistory] = useState([]);
+  const [gameStatus, setGameStatus] = useState("notOver");
+
 
   function safeGameMutate(modify) {
     return new Promise((resolve, reject) => {
@@ -32,29 +35,38 @@ const ChessContextProvider = (props) => {
     });
     setMoveHistory([]);
   }
-  useEffect(() => {
-    setNewGame();
-  }, [newGameTrigger]);
 
-  function computerMakeMove(playerMoveFrom, playerMoveTo) {
-    playerMakeMoveEmit(playerMoveFrom, playerMoveTo, (computerMove) => {
+  function playerMakeMoveEmit(playerMoveFrom, playerMoveTo) {
+    console.log("playerMakeMove: ChessContextProvider");
+    console.log(`player move from ${playerMoveFrom} to ${playerMoveTo}`);
+    ChessAndSocketEventEmitter.emit("playerMakeMove", {
+      playerMoveFrom,
+      playerMoveTo,
+    });
+  }
+
+  useEffect(() => {
+    ChessAndSocketEventEmitter.on("opponentMakeMove", (data) => {
       safeGameMutate(async (game) => {
         // console.log(computerMove);
         const move = await game.move({
-          from: computerMove.from,
-          to: computerMove.to,
+          from: data.opponentMoveFrom,
+          to: data.opponentMoveTo,
           promotion: "q",
         });
+        if (!move) return;
 
         //Update captured pieces
         if (move.captured) {
           addCapturedPieces("white", move.captured);
         }
         //Update moveHistory
-        updateMoveHistory(true);
       });
     });
-  }
+    ChessAndSocketEventEmitter.on("setNewGame", () => {
+      setNewGame();
+    });
+  }, []);
 
   function playerMakeMove(playerMoveFrom, playerMoveTo, callback) {
     safeGameMutate(async (game) => {
@@ -74,7 +86,6 @@ const ChessContextProvider = (props) => {
         addCapturedPieces("black", move.captured);
       }
       //Update moveHistory
-      updateMoveHistory(true);
       callback(true);
     });
   }
@@ -90,7 +101,10 @@ const ChessContextProvider = (props) => {
   function popCapturedPieces(color) {
     return new Promise((resolve, reject) => {
       setCapturedPieces((prevCapturedPieces) => {
-        let newCapturedPieces = prevCapturedPieces[color].length > 0 ? prevCapturedPieces[color].slice(0, -1) : [...prevCapturedPieces[color]];
+        let newCapturedPieces =
+          prevCapturedPieces[color].length > 0
+            ? prevCapturedPieces[color].slice(0, -1)
+            : [...prevCapturedPieces[color]];
         return {
           ...prevCapturedPieces,
           [color]: newCapturedPieces,
@@ -119,14 +133,15 @@ const ChessContextProvider = (props) => {
     const captures = await chessUndo();
     for (const capture of captures) {
       console.log(capture.color);
-      const color = capture.color === 'w' ? 'black' : 'white';
+      const color = capture.color === "w" ? "black" : "white";
       await popCapturedPieces(color);
     }
     //Update moveHistory
-    updateMoveHistory(true);
   }
 
   function updateMoveHistory(verbose) {
+    console.log("Game History");
+    console.log(game.history({ verbose: verbose }));
     setMoveHistory(game.history({ verbose: verbose }));
   }
 
@@ -134,17 +149,32 @@ const ChessContextProvider = (props) => {
     return game.turn();
   }
 
+  function checkGameStatus() {
+    const possibleMovesNumber = game.moves().length;
+
+    if (game.in_checkmate() || possibleMovesNumber === 0)
+      return game.turn() === "w" ? "blackWin" : "whiteWin";
+    else if (game.in_draw()) return "draw";
+    else return "notOver";
+  }
+
+  useEffect(() => {
+    updateMoveHistory(true);
+    setGameStatus(checkGameStatus());
+  }, [game]);
+
   return (
     <ChessContext.Provider
       value={{
         game,
         capturedPieces,
-        computerMakeMove,
         playerMakeMove,
+        playerMakeMoveEmit,
         playerUndo,
         moveHistory,
         checkTurn,
         setNewGame,
+        gameStatus
       }}
     >
       {props.children}
