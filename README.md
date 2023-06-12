@@ -39,5 +39,9 @@ Also, here are some real footage you can watch:
 ### Deployment
 - Manually deployed with NGINX on Linode Linux Server
 
+## Future Improvement
+- Adding Stockfish engine to AI opponent.
+- Adding video chat feature in multiplayer mode to enhance player interaction
+
 ## Reference
 <a href="https://www.flaticon.com/free-stickers/animals" title="animals stickers">Animals stickers created by Stickers - Flaticon</a>
