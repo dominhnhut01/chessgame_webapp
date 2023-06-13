@@ -41,26 +41,39 @@ const SocketContextProvider = (props) => {
 
   useEffect(() => {
     async function joinRoom(socket) {
-      socket.emit("joinRoom", roomID, async (succeed, roomID, playerColorReturn) => {
-        setIsConnected(succeed);
-        if (!succeed) {
-          alert("Room is full or does not exist! Please reload the website to continue");
-          socket.disconnect();
-          ChessAndSocketEventEmitter.emit("setNewGame");
-          navigate('/');
-        }
-        if (playerColor !== playerColorReturn)
-          setPlayerColor(playerColorReturn);
-        setRoomID(roomID);
-        setRoomLink(`${baseLink}${roomID}`);
+      return new Promise((resolve) => {
+        const timeout = setTimeout(() => {
+          // Handle timeout
+          resolve(false); // Resolve the promise with false indicating failure
+        }, 300); // Timeout duration in milliseconds (e.g., 5000ms = 5 seconds)
+    
+        socket.emit("joinRoom", roomID, async (succeed, roomID, playerColorReturn) => {
+          clearTimeout(timeout); // Clear the timeout since the callback was executed
+    
+          setIsConnected(succeed);
+          if (!succeed) {
+            alert("Room is full or does not exist! Please reload the website to continue");
+            socket.disconnect();
+            ChessAndSocketEventEmitter.emit("setNewGame");
+            navigate('/');
+          }
+          if (playerColor !== playerColorReturn)
+            setPlayerColor(playerColorReturn);
+          setRoomID(roomID);
+          setRoomLink(`${baseLink}${roomID}`);
+    
+          resolve(succeed); // Resolve the promise with the value of succeed
+        });
       });
     }
 
     async function connectSocket() {
       // Code to initialize and connect the socket
       // Loop until socket.isConnected() returns true
-      while (!socket.connected) {
-        await joinRoom(socket);
+      let succeed = false;
+      while (!succeed) {
+        console.log("sending joinRoom request")
+        succeed = await joinRoom(socket);
         await new Promise((resolve) => setTimeout(resolve, 1500)); // Delay for 1 second
       }
 
@@ -69,6 +82,10 @@ const SocketContextProvider = (props) => {
 
     connectSocket();
   }, []);
+
+  useEffect(() => {
+    console.log(isConnected)
+  }, [isConnected])
 
   useEffect(() => {
     ChessAndSocketEventEmitter.on("playerMakeMove", (data) => {

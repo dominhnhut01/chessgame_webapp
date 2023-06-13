@@ -83,6 +83,12 @@ export default function ControlBox() {
   const [messageType, setMessageType] = useState("normal");
   const [visibleMessageBox, setVisibleMessageBox] = useState(false);
 
+  // function difficultySelect(evt) {
+  //   setDifficultyEmit(parseInt(evt.target.value), (succeed) => {
+  //     if (!succeed) alert("Please try setting difficulty again");
+  //   });
+  // }
+
   function difficultySelect(evt) {
     setDifficultyEmit(parseInt(evt.target.value), (succeed) => {
       if (!succeed) alert("Please try setting difficulty again");
@@ -146,6 +152,22 @@ export default function ControlBox() {
       <div className="control-box shadow-box">
         <div className="difficulty-select container-fluid">
           <div className="row">
+          {/* <div className="col-5" id="heading">
+              AI Model
+            </div> */}
+            {/* <div className="col-7">
+              <select
+                className="form-select"
+                aria-label="difficulty-select"
+                onChange={difficultySelect}
+              >
+                <option value="minimax">Minimax Model (Easy Mode)</option>
+                <option selected value="stockfish">
+                  Stockfish Model (Expert Mode)
+                </option>
+              </select>
+            </div> */}
+
             <div className="col-5" id="heading">
               Difficulty
             </div>

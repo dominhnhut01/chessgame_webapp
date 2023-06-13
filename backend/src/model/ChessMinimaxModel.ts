@@ -9,8 +9,9 @@ import {
   Square,
   MoveSAN,
 } from "./ChessModel";
+import ChessAIModelInterface from "./ChessAIModelInterface";
 
-class ChessAIEngine extends ChessEngine {
+class ChessMinimaxModel extends ChessEngine implements ChessAIModelInterface{
   private readonly pieceTables = new Map([
     [
       "p",
@@ -384,7 +385,7 @@ class ChessAIEngine extends ChessEngine {
    * Computer will analyze and make the best move.
    * @returns the move that computer just made
    */
-  computerMakingMove(): string[] {
+  async computerMakingMove(): Promise<string[]> {
     let bestMove: Move;
     //Perform opening move
     if (this.openingMoves.length > 0) {
@@ -418,11 +419,11 @@ class ChessAIEngine extends ChessEngine {
     console.log(this.curEvaluationScore);
   }
 
-  setMinimaxSearchDepth(difficulty: number) {
+  setSearchDepth(difficulty: number): void {
     this.minimaxSearchDepth = difficulty * 2 + 1;
   }
 
-  playerUndo(): Move | null {
+  playerUndo(): void {
     //Undo computer move and player move
     let moveUndo = this.undo();
     if (moveUndo) {
@@ -435,8 +436,7 @@ class ChessAIEngine extends ChessEngine {
       this.curEvaluationScore =
         10000 + this.calcEvaluationScore(this.chess.board());
     }
-    return moveUndo;
   }
 }
 
-export { ChessAIEngine, GameStatus };
+export { ChessMinimaxModel, GameStatus };
