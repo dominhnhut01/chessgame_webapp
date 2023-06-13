@@ -20,8 +20,8 @@ type GameStatus = "whiteWin" | "blackWin" | "draw" | "notOver";
 
 class ChessEngine {
   protected chess: Chess;
-  constructor() {
-    this.chess = new Chess();
+  constructor(fen: string = "") {
+    this.chess = !fen ? new Chess() : new Chess(fen);
   }
   
   makeMove(
@@ -40,6 +40,10 @@ class ChessEngine {
   }
   undo(): Move | null {
     return this.chess.undo();
+  }
+
+  getFen(): string {
+    return this.chess.fen();
   }
 
 }

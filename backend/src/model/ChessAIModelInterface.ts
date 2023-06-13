@@ -5,6 +5,7 @@ interface ChessAIModelInterface {
     updatePlayerMove(playerMoveFrom: string, playerMoveTo: string): void;
     setSearchDepth(difficulty: number): void;
     playerUndo(): void;
+    getFen(): string;
 }
 
 export default ChessAIModelInterface;

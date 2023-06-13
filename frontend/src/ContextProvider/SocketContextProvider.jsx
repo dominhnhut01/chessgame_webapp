@@ -126,7 +126,6 @@ const SocketContextProvider = (props) => {
     socket.disconnect();
     navigate('/');
     ChessAndSocketEventEmitter.emit("setNewGame");
-    
   })
 
   function setNewGameEmit(callback) {
@@ -153,6 +152,11 @@ const SocketContextProvider = (props) => {
     });
   }
 
+  function setAIModelEmit(aiModel, callback) {
+    socket.emit("setAIModel", aiModel, (succeed) => {
+      callback(succeed);
+    });
+  }
 
 
   return (
@@ -165,6 +169,7 @@ const SocketContextProvider = (props) => {
         setDifficultyEmit,
         roomLink,
         playerColor,
+        setAIModelEmit
       }}
     >
       {props.children}

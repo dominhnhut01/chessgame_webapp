@@ -5,21 +5,21 @@ import { Engine } from "node-uci";
 
 class ChessStockfishModel extends ChessEngine implements ChessAIModelInterface {
   private stockfishEngine: Engine;
-  private searchDepth = 8;
-  private constructor(stockfishEngine: Engine, difficulty: number) {
-    super();
-    this.searchDepth = 8 + difficulty
+  private searchDepth = 5;
+  private constructor(stockfishEngine: Engine, difficulty: number, fen: string="") {
+    super(fen);
+    this.searchDepth = 5 + difficulty * 2;
     this.stockfishEngine = stockfishEngine;
   }
 
-  public static async loadStockfishEngine(difficulty: number): Promise<ChessStockfishModel> {
+  public static async loadStockfishEngine(difficulty: number, fen: string=""): Promise<ChessStockfishModel> {
     const stockfishEngine: Engine = new Engine(
       "/home/dominhnhut01/work/personal_project/web_development/chessgame_webapp/backend/src/model/stockfish_15.1_linux_x64/stockfish-ubuntu-20.04-x86-64"
     );
     await stockfishEngine.init();
     await stockfishEngine.isready();
 
-    return new ChessStockfishModel(stockfishEngine, difficulty);
+    return new ChessStockfishModel(stockfishEngine, difficulty, fen);
   }
 
   updatePlayerMove(playerMoveFrom: string, playerMoveTo: string): void {
@@ -46,7 +46,7 @@ class ChessStockfishModel extends ChessEngine implements ChessAIModelInterface {
   }
 
   setSearchDepth(difficulty: number): void {
-      this.searchDepth = 8 + difficulty;
+      this.searchDepth = 5 + difficulty * 2;
   }
 
   playerUndo(): void {

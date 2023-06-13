@@ -190,6 +190,27 @@ export class ServerSocket {
       }
     );
 
+    socket.on(
+      "setAIModel",
+      async (aiModel: string, callback: (succeed: boolean) => void) => {
+        if (this.socketsRecord.get(socket.id)?.isInMultiplayerMode)
+          callback(false);
+        try {
+          console.log("changing AI Model")
+          let curFen = chessEngine.getFen();
+           if (aiModel === "stockfish") {
+            chessEngine = await ChessStockfishModel.loadStockfishEngine(difficulty, curFen);
+           }  else if (aiModel === "minimax") {
+            chessEngine = new ChessMinimaxModel(difficulty, curFen);
+           }
+          // console.log(`Set difficulty to ${difficulty}`);
+          callback(true);
+        } catch (e: any) {
+          callback(false);
+        }
+      }
+    )
+
     socket.on("setNewGame", async (callback: (succeed: boolean) => void) => {
       if (this.socketsRecord.get(socket.id)?.isInMultiplayerMode) {
         try {
@@ -201,7 +222,7 @@ export class ServerSocket {
         }
       } else {
         try {
-          chessEngine = new ChessMinimaxModel(difficulty, "random");
+          chessEngine = new ChessMinimaxModel(difficulty);
           callback(true);
         } catch (e: any) {
           // console.log(e);

@@ -105,14 +105,14 @@ class ChessMinimaxModel extends ChessEngine implements ChessAIModelInterface{
     ["k", 99], //To prevent useless check
   ]);
 
-  private readonly openingMovesMap: Map<string, MoveSAN[]> = new Map([
-    ["italian_game", ["e5", "Nf6", "Bc5"].reverse()],
-    ["guy_lopez", ["d5", "Nc6", "Bg4"].reverse()],
-    ["vienna_game", ["e5", "c5"].reverse()],
-    ["queen_gambit", ["d5", "c5"].reverse()],
-    ["london_opening", ["e5", "Nf6", "Bc5"].reverse()],
-    ["catalan_opening", ["d5", "c5", "g6"].reverse()],
-  ]);
+  // private readonly openingMovesMap: Map<string, MoveSAN[]> = new Map([
+  //   ["italian_game", ["e5", "Nf6", "Bc5"].reverse()],
+  //   ["guy_lopez", ["d5", "Nc6", "Bg4"].reverse()],
+  //   ["vienna_game", ["e5", "c5"].reverse()],
+  //   ["queen_gambit", ["d5", "c5"].reverse()],
+  //   ["london_opening", ["e5", "Nf6", "Bc5"].reverse()],
+  //   ["catalan_opening", ["d5", "c5", "g6"].reverse()],
+  // ]);
   private minimaxSearchDepth: number;
   private curEvaluationScore: number;
   private openingMoves: MoveSAN[] = [];
@@ -120,21 +120,22 @@ class ChessMinimaxModel extends ChessEngine implements ChessAIModelInterface{
 
   constructor(
     difficultyLevel: number,
-    openingStrategy: string = "italian_game"
+    fen: string = "",
+    // openingStrategy: string = "italian_game"
   ) {
-    super();
+    super(fen);
     this.curEvaluationScore =
       10000 + this.calcEvaluationScore(this.chess.board());
     this.minimaxSearchDepth = difficultyLevel * 2 + 1;
 
-    if (openingStrategy === "random") {
-      let openingMovesList = Array.from(this.openingMovesMap.values());
-      this.openingMoves =
-        openingMovesList[Math.floor(Math.random() * openingMovesList.length)];
-    } else {
-      if (this.openingMovesMap.has(openingStrategy))
-        this.openingMoves = this.openingMovesMap.get(openingStrategy)!;
-    }
+    // if (openingStrategy === "random") {
+    //   let openingMovesList = Array.from(this.openingMovesMap.values());
+    //   this.openingMoves =
+    //     openingMovesList[Math.floor(Math.random() * openingMovesList.length)];
+    // } else {
+    //   if (this.openingMovesMap.has(openingStrategy))
+    //     this.openingMoves = this.openingMovesMap.get(openingStrategy)!;
+    // }
   }
 
   private switchSide(rank: Rank, file: File): [Rank, File] {
