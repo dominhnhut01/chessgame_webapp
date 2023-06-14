@@ -5,7 +5,7 @@ Welcome to ChessLand, a web application where you can play chess against AI or c
 
 ## Features
 
-- Play against AI: Challenge our intelligent AI opponent and improve your chess skills.
+- Play against AI: Challenge our intelligent AI opponent and improve your chess skills. You can choose either Stockfish or Minimax AI.
 - Play with a friend: Invite your friend to a game and play together.
 - Interactive interface: Enjoy a visually appealing and intuitive user interface for a seamless gaming experience.
 - Move validation: The app ensures that all moves adhere to the rules of chess.
@@ -17,7 +17,7 @@ Welcome to ChessLand, a web application where you can play chess against AI or c
 
 ## Demo
 
-You can try out ChessLand by visiting our [live demo](https://chessland.netlify.app/) hosted on Linode and Netlify.
+You can try out ChessLand by visiting our [live demo](https://chess-land.netlify.app/) hosted on Linode and Netlify.
 Also, here are some real footage you can watch:
 #### Singleplayer (vs AI):
 <img src='https://github.com/dominhnhut01/chessgame_webapp/blob/main/singleplayer_demo.gif?raw=true' title='Singleplayer Demo' width='900' alt='Singleplayer Demo' />
@@ -40,7 +40,6 @@ Also, here are some real footage you can watch:
 - Manually deployed with NGINX on Linode Linux Server
 
 ## Future Improvement
-- Adding Stockfish engine to AI opponent.
 - Adding video chat feature in multiplayer mode to enhance player interaction
 
 ## Reference
