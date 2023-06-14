@@ -43,5 +43,5 @@ Also, here are some real footage you can watch:
 - Adding video chat feature in multiplayer mode to enhance player interaction
 
 ## Reference
-<a href="https://www.flaticon.com/free-stickers/animals" title="animals stickers">Animals stickers created by Stickers - Flaticon</a>
-Stockfish Chess Engine: <a href="https://stockfishchess.org/">Home Page</a>
+- <a href="https://www.flaticon.com/free-stickers/animals" title="animals stickers">Animals stickers created by Stickers - Flaticon</a>
+- Stockfish Chess Engine: <a href="https://stockfishchess.org/">Home Page</a>
