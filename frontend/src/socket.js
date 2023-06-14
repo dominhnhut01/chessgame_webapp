@@ -1,3 +1,3 @@
 import { io } from "socket.io-client";
 
-export const socket = io('http://localhost:4800', {transports: ['websocket'], upgrade: false});
+export const socket = io('https://chessland.online', {transports: ['websocket'], upgrade: false});

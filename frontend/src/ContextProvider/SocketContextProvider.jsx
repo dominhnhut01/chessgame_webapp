@@ -32,7 +32,7 @@ const SocketContextProvider = (props) => {
   const [playerColor, setPlayerColor] = useState("white");
 
   const [isConnected, setIsConnected] = useState(socket.connected);
-  const baseLink = "https://chessland.netlify.app/"
+  const baseLink = window.location.href
   const [roomLink, setRoomLink] = useState(
     roomID ? `${baseLink}${roomID}` : ""
   ); //Set room link later by calling the backend
