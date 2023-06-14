@@ -14,6 +14,11 @@ body > #root {
   border: 0.5px red solid;
 } */
 
+.app-wrapper {
+  margin: 0;
+  height: 100%;
+}
+
 .app {
   padding-top: 1vh;
   padding-bottom: 1vh;
@@ -21,7 +26,7 @@ body > #root {
   padding-right: 10vw;
 
   margin: 0;
-  height: 100%;
+  height: 70%;
   /* padding-left: 5vw;
   padding-right: 5vw; */
 }

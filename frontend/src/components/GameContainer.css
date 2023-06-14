@@ -26,11 +26,59 @@
   padding-left: 1vw;
   padding-right: 1vw;
 }
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
 
 .chessboard {
-  padding-left: 20vh;
-  padding-right: 20vh;
+  --padding-x: 10vmin;
+  padding-left: var(--padding-x);
+  padding-right: var(--padding-x);
 
   margin-top: 2.1%;
   margin-bottom: 2.3%;
+}
+
+@media screen and (max-width: 767px) {
+  .chessboard {
+    /* Override the font size for extra small devices */
+    --padding-x: 10vmin;
+  }
+}
+
+@media screen and (min-width: 768px) and (max-width: 991px) {
+  .chessboard {
+    /* Override the font size for small devices */
+    --padding-x: 10vmin;
+  }
+}
+@media screen and (min-width: 992px) and (max-width: 1199px) {
+  .chessboard {
+    /* Override the font size for small devices */
+    --padding-x: 10vmin;
+  }
+}
+@media screen and (min-width: 1200px) and (max-width: 1499px){
+  .chessboard {
+    /* Override the font size for large devices */
+    --padding-x: 10vmin;
+  }
+}
+
+@media screen and (min-width: 1500px) and (max-width: 1999px){
+  .chessboard {
+    /* Override the font size for large devices */
+    --padding-x: 20vmin;
+  }
+}
+
+@media screen and (min-width: 2000px) {
+  .chessboard {
+    /* Override the font size for large devices */
+    --padding-x: 30vmin;
+  }
 }

@@ -43,7 +43,7 @@ function RoomLinkBox() {
 
   return (
     <div className="room-link-box-wrapper shadow-box">
-      <h5 id="roomLinkTitle">Invite friends to this room</h5>
+      <h1 id="roomLinkTitle">Invite friends to this room</h1>
       <div className="room-link-box">
         <input
           type="text"
@@ -151,11 +151,11 @@ export default function ControlBox() {
     <div className="control-box-container">
       <div className="control-box shadow-box">
         <div className="difficulty-select container-fluid">
-          <div className="row">
-          <div className="col-5" id="heading">
+          <div className="row gy-3">
+          <div className="col-sm-5 col-md-5 col-lg-5" id="heading">
               AI Model
             </div>
-            <div className="col-7">
+            <div className="col-sm-7 col-md-7 col-lg-7">
               <select
                 className="form-select"
                 aria-label="aiModel-select"
@@ -168,10 +168,10 @@ export default function ControlBox() {
               </select>
             </div>
 
-            <div className="col-5" id="heading">
+            <div className="col-sm-5 col-md-5 col-lg-5" id="heading">
               Difficulty
             </div>
-            <div className="col-7">
+            <div className="col-sm-7 col-md-7 col-lg-7">
               <select
                 className="form-select"
                 aria-label="difficulty-select"

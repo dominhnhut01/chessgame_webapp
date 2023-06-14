@@ -21,10 +21,10 @@ function App() {
                     <ChessContextProvider>
                       <div className="app container-fluid">
                         <div className="row">
-                          <div className="col-lg-8 col-md-10 col-sm-12">
+                          <div className="col-lg-8 col-md-12 col-sm-12">
                             <GameContainer />
                           </div>
-                          <div className="col-lg-4 col-md-2 col-sm-12">
+                          <div className="col-lg-4 col-md-10 col-sm-12">
                             <ControlBox />
                           </div>
                         </div>
@@ -38,12 +38,12 @@ function App() {
           })}
         </Routes>
       </BrowserRouter>
-      <MDBFooter bgColor="white" className="text-center text-lg-left p-t-50">
+      <MDBFooter bgColor="white" className="footer text-center text-lg-left p-t-50">
         <div
           className="text-center p-3"
           style={{ backgroundColor: "rgba(100, 100, 100, 0.05)" }}
         >
-          &copy; {new Date().getFullYear()} Copyright:{" "}
+          &copy; 2023 Copyright:{""}
           <h6>Steve Do, Duong Vo</h6>
           <h7>Find our code on Github! </h7>
           <a
