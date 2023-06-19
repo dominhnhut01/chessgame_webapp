@@ -8,6 +8,7 @@
   --width: 70%;
   width: var(--width);
   height: 85vh;
+  /* max-height: inherit; */
   padding-top: 3vh;
   padding-bottom: 3vh;
   margin-left: auto;
@@ -27,8 +28,7 @@
   padding-right: 10%;
 
   width: 100%;
-
-  
+  overflow: hidden;  
   /* background-color: azure; */
 }
 
