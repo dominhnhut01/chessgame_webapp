@@ -1,8 +1,10 @@
 import { Server as HttpServer } from "http";
 import { Socket, Server } from "socket.io";
-import { ChessAIEngine, GameStatus } from "./model/ChessAIModel";
+import { ChessMinimaxModel, GameStatus } from "./model/ChessMinimaxModel";
 import { v4 as uuidv4 } from "uuid";
 import { ChessEngine } from "./model/ChessModel";
+import ChessAIModelInterface from "./model/ChessAIModelInterface";
+import ChessStockfishModel from "./model/ChessStockfishEngine";
 
 type Color = "white" | "black";
 const avatarFilePaths:Array<String> = [
@@ -93,14 +95,11 @@ export class ServerSocket {
     this.roomsRecord.get(roomID)!.numberOfPlayers += 1;
   }
 
-  StartListeners = (socket: Socket) => {
+  StartListeners = async (socket: Socket) => {
     console.info("Message received from " + socket.id);
     let difficulty = 1;
-    let chessEngine: ChessAIEngine = new ChessAIEngine(
-      difficulty,
-      "random"
-    );
-    let isMultiplayerMode = false;
+    let chessEngine: ChessAIModelInterface = await ChessStockfishModel.loadStockfishEngine(difficulty);
+    console.log("done loading")
     let roomID: string;
 
     socket.on(
@@ -113,7 +112,7 @@ export class ServerSocket {
           playerColor: Color | null
         ) => void
       ) => {
-
+        console.log("Join room request")
         //if no record about this socket and no input roomID => This is a new socket and need to create a new room
         if (!this.socketsRecord.has(socket.id) && !clientRoomID) {
           roomID = uuidv4();
@@ -155,7 +154,7 @@ export class ServerSocket {
 
     socket.on(
       "playerMakeMove",
-      (playerMoveFrom: string, playerMoveTo: string) => {
+      async (playerMoveFrom: string, playerMoveTo: string) => {
         // console.log(
         //   `player make move from ${playerMoveFrom} to ${playerMoveTo}`
         // );
@@ -172,8 +171,8 @@ export class ServerSocket {
           playerMoveFrom,
           playerMoveTo
         );
-        let [opponentMoveFrom, opponentMoveTo] = (
-          chessEngine as ChessAIEngine
+        let [opponentMoveFrom, opponentMoveTo] = await (
+          chessEngine as ChessMinimaxModel
         ).computerMakingMove();
 
   
@@ -202,7 +201,7 @@ export class ServerSocket {
           callback(false);
         try {
           difficulty = difficulty;
-          chessEngine.setMinimaxSearchDepth(difficulty);
+          chessEngine.setSearchDepth(difficulty);
           // console.log(`Set difficulty to ${difficulty}`);
           callback(true);
         } catch (e: any) {
@@ -210,6 +209,27 @@ export class ServerSocket {
         }
       }
     );
+
+    socket.on(
+      "setAIModel",
+      async (aiModel: string, callback: (succeed: boolean) => void) => {
+        if (this.socketsRecord.get(socket.id)?.isInMultiplayerMode)
+          callback(false);
+        try {
+          console.log("changing AI Model")
+          let curFen = chessEngine.getFen();
+           if (aiModel === "stockfish") {
+            chessEngine = await ChessStockfishModel.loadStockfishEngine(difficulty, curFen);
+           }  else if (aiModel === "minimax") {
+            chessEngine = new ChessMinimaxModel(difficulty, curFen);
+           }
+          // console.log(`Set difficulty to ${difficulty}`);
+          callback(true);
+        } catch (e: any) {
+          callback(false);
+        }
+      }
+    )
 
     socket.on("setNewGame", async (callback: (succeed: boolean) => void) => {
       if (this.socketsRecord.get(socket.id)?.isInMultiplayerMode) {
@@ -222,7 +242,7 @@ export class ServerSocket {
         }
       } else {
         try {
-          chessEngine = new ChessAIEngine(difficulty, "random");
+          chessEngine = new ChessMinimaxModel(difficulty);
           callback(true);
         } catch (e: any) {
           // console.log(e);

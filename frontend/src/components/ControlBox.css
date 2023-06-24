@@ -2,28 +2,33 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  row-gap: 3vh;
+  row-gap: 2rem;
 
-  width: 70%;
+
+  --width: 70%;
+  width: var(--width);
+  height: 85vh;
+  /* max-height: inherit; */
   padding-top: 3vh;
   padding-bottom: 3vh;
   margin-left: auto;
   margin-right: auto;
+
 }
 
 .control-box {
   display: flex;
   flex-direction: column;
-  height: 50vh;
+  height: 100%;
   row-gap: 10px;
 
-  padding-top: 3vh;
-  padding-bottom: 3vh;
-  padding-left: 2vw;
-  padding-right: 2vw;
+  padding-top: 14%;
+  padding-bottom: 14%;
+  padding-left: 10%;
+  padding-right: 10%;
 
   width: 100%;
-
+  overflow: hidden;  
   /* background-color: azure; */
 }
 
@@ -129,7 +134,8 @@
   padding-right: auto;
 
   text-align: center;
-  font-size: 1.2vw;
+  font-size: 1.35rem;
+  font-weight: bold;
 }
 
 #roomLink {
@@ -159,6 +165,7 @@
   padding-bottom: 2vh;
 
   font-weight: bold;
+  font-size: 1.2rem;
 }
 
 .red-background {
@@ -168,3 +175,31 @@
 .white-background {
   background-color: rgb(206, 255, 132);
 }
+
+@media screen and (max-width: 767px) {
+  .control-box-container {
+    /* Override the font size for extra small devices */
+    --width: 50%;
+  }
+}
+
+@media screen and (min-width: 768px) and (max-width: 991px) {
+  .control-box-container {
+    /* Override the font size for small devices */
+    --width: 50%;
+  }
+}
+@media screen and (min-width: 1200px) and (max-width: 1999px){
+  .control-box-container {
+    /* Override the font size for large devices */
+    --width: 70%;
+  }
+}
+
+@media screen and (min-width: 2000px) {
+  .control-box-container {
+    /* Override the font size for large devices */
+    --width: 50%;
+  }
+}
+

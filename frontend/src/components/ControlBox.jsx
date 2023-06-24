@@ -43,7 +43,7 @@ function RoomLinkBox() {
 
   return (
     <div className="room-link-box-wrapper shadow-box">
-      <h5 id="roomLinkTitle">Invite friends to this room</h5>
+      <h1 id="roomLinkTitle">Invite friends to this room</h1>
       <div className="room-link-box">
         <input
           type="text"
@@ -73,7 +73,7 @@ function RoomLinkBox() {
 }
 
 export default function ControlBox() {
-  const { playerUndoEmit, setNewGameEmit, setDifficultyEmit } =
+  const { playerUndoEmit, setNewGameEmit, setDifficultyEmit, setAIModelEmit } =
     useContext(SocketContext);
   const { playerUndo, checkTurn, setNewGame, gameStatus } =
     useContext(ChessContext);
@@ -82,6 +82,12 @@ export default function ControlBox() {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("normal");
   const [visibleMessageBox, setVisibleMessageBox] = useState(false);
+
+  function aiModelSelect(evt) {
+    setAIModelEmit(evt.target.value, (succeed) => {
+      if (!succeed) alert("Please try setting AI model again");
+    });
+  }
 
   function difficultySelect(evt) {
     setDifficultyEmit(parseInt(evt.target.value), (succeed) => {
@@ -118,7 +124,6 @@ export default function ControlBox() {
   }
 
   useEffect(() => {
-    console.log(gameStatus);
     switch (gameStatus) {
       case "whiteWin":
         setMessage("White wins! Please start a new game.");
@@ -146,11 +151,27 @@ export default function ControlBox() {
     <div className="control-box-container">
       <div className="control-box shadow-box">
         <div className="difficulty-select container-fluid">
-          <div className="row">
-            <div className="col-5" id="heading">
+          <div className="row gy-3">
+          <div className="col-sm-5 col-md-5 col-lg-5" id="heading">
+              AI Model
+            </div>
+            <div className="col-sm-7 col-md-7 col-lg-7">
+              <select
+                className="form-select"
+                aria-label="aiModel-select"
+                onChange={aiModelSelect}
+              >
+                <option value="minimax">Minimax Model (Easy Mode)</option>
+                <option selected value="stockfish">
+                  Stockfish Model (Expert Mode)
+                </option>
+              </select>
+            </div>
+
+            <div className="col-sm-5 col-md-5 col-lg-5" id="heading">
               Difficulty
             </div>
-            <div className="col-7">
+            <div className="col-sm-7 col-md-7 col-lg-7">
               <select
                 className="form-select"
                 aria-label="difficulty-select"

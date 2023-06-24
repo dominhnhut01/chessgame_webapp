@@ -31,40 +31,50 @@ const SocketContextProvider = (props) => {
   const [roomID, setRoomID] = useState(useParams().roomID);
   const [playerColor, setPlayerColor] = useState("white");
   const [isConnected, setIsConnected] = useState(socket.connected);
-  const [playerAvatar, setPlayerAvatar] = useState("/avatar/robot1.png");
+  const baseLink = window.location.href
   const [roomLink, setRoomLink] = useState(
     roomID ? `${baseLink}${roomID}` : ""
   ); //Set room link later by calling the backend
 
-  const baseLink = "https://chessland.netlify.app/"
 
   const avatars = selectRandom(avatarFilePaths);
 
   useEffect(() => {
     async function joinRoom(socket) {
-      socket.emit("joinRoom", roomID, async (succeed, roomID, playerColorReturn) => {
-        setIsConnected(succeed);
-        if (!succeed) {
-          alert("Room is full or does not exist! Please reload the website to continue");
-          socket.disconnect();
-          ChessAndSocketEventEmitter.emit("setNewGame");
-          navigate('/');
-        }
-        console.log(`Join room: ${roomID}`);
-        if (playerColor !== playerColorReturn)
-          setPlayerColor(playerColorReturn);
-        setRoomID(roomID);
-        setRoomLink(`${baseLink}${roomID}`);
+      return new Promise((resolve) => {
+        const timeout = setTimeout(() => {
+          // Handle timeout
+          resolve(false); // Resolve the promise with false indicating failure
+        }, 300); // Timeout duration in milliseconds (e.g., 5000ms = 5 seconds)
+    
+        socket.emit("joinRoom", roomID, async (succeed, roomID, playerColorReturn) => {
+          clearTimeout(timeout); // Clear the timeout since the callback was executed
+    
+          setIsConnected(succeed);
+          if (!succeed) {
+            alert("Room is full or does not exist! Please reload the website to continue");
+            socket.disconnect();
+            ChessAndSocketEventEmitter.emit("setNewGame");
+            navigate('/');
+          }
+          if (playerColor !== playerColorReturn)
+            setPlayerColor(playerColorReturn);
+          setRoomID(roomID);
+          setRoomLink(`${baseLink}${roomID}`);
+    
+          resolve(succeed); // Resolve the promise with the value of succeed
+        });
       });
     }
 
     async function connectSocket() {
       // Code to initialize and connect the socket
       // Loop until socket.isConnected() returns true
-      while (!socket.connected) {
-        await joinRoom(socket);
+      let succeed = false;
+      while (!succeed) {
+        console.log("sending joinRoom request")
+        succeed = await joinRoom(socket);
         await new Promise((resolve) => setTimeout(resolve, 1500)); // Delay for 1 second
-        console.log(isConnected);
       }
 
       ChessAndSocketEventEmitter.emit("setNewGame");
@@ -72,6 +82,10 @@ const SocketContextProvider = (props) => {
 
     connectSocket();
   }, []);
+
+  useEffect(() => {
+    console.log(isConnected)
+  }, [isConnected])
 
   useEffect(() => {
     ChessAndSocketEventEmitter.on("playerMakeMove", (data) => {
@@ -112,7 +126,6 @@ const SocketContextProvider = (props) => {
     socket.disconnect();
     navigate('/');
     ChessAndSocketEventEmitter.emit("setNewGame");
-    
   })
 
   function setNewGameEmit(callback) {
@@ -139,6 +152,11 @@ const SocketContextProvider = (props) => {
     });
   }
 
+  function setAIModelEmit(aiModel, callback) {
+    socket.emit("setAIModel", aiModel, (succeed) => {
+      callback(succeed);
+    });
+  }
 
 
   return (
@@ -151,6 +169,7 @@ const SocketContextProvider = (props) => {
         setDifficultyEmit,
         roomLink,
         playerColor,
+        setAIModelEmit
       }}
     >
       {props.children}

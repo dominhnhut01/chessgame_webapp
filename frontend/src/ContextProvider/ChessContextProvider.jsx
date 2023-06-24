@@ -37,8 +37,6 @@ const ChessContextProvider = (props) => {
   }
 
   function playerMakeMoveEmit(playerMoveFrom, playerMoveTo) {
-    console.log("playerMakeMove: ChessContextProvider");
-    console.log(`player move from ${playerMoveFrom} to ${playerMoveTo}`);
     ChessAndSocketEventEmitter.emit("playerMakeMove", {
       playerMoveFrom,
       playerMoveTo,
@@ -132,7 +130,6 @@ const ChessContextProvider = (props) => {
     //Undo twice: computer move and playermove
     const captures = await chessUndo();
     for (const capture of captures) {
-      console.log(capture.color);
       const color = capture.color === "w" ? "black" : "white";
       await popCapturedPieces(color);
     }
@@ -140,8 +137,6 @@ const ChessContextProvider = (props) => {
   }
 
   function updateMoveHistory(verbose) {
-    console.log("Game History");
-    console.log(game.history({ verbose: verbose }));
     setMoveHistory(game.history({ verbose: verbose }));
   }
 

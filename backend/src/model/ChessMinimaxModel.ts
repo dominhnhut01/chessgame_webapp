@@ -9,8 +9,9 @@ import {
   Square,
   MoveSAN,
 } from "./ChessModel";
+import ChessAIModelInterface from "./ChessAIModelInterface";
 
-class ChessAIEngine extends ChessEngine {
+class ChessMinimaxModel extends ChessEngine implements ChessAIModelInterface{
   private readonly pieceTables = new Map([
     [
       "p",
@@ -104,14 +105,14 @@ class ChessAIEngine extends ChessEngine {
     ["k", 99], //To prevent useless check
   ]);
 
-  private readonly openingMovesMap: Map<string, MoveSAN[]> = new Map([
-    ["italian_game", ["e5", "Nf6", "Bc5"].reverse()],
-    ["guy_lopez", ["d5", "Nc6", "Bg4"].reverse()],
-    ["vienna_game", ["e5", "c5"].reverse()],
-    ["queen_gambit", ["d5", "c5"].reverse()],
-    ["london_opening", ["e5", "Nf6", "Bc5"].reverse()],
-    ["catalan_opening", ["d5", "c5", "g6"].reverse()],
-  ]);
+  // private readonly openingMovesMap: Map<string, MoveSAN[]> = new Map([
+  //   ["italian_game", ["e5", "Nf6", "Bc5"].reverse()],
+  //   ["guy_lopez", ["d5", "Nc6", "Bg4"].reverse()],
+  //   ["vienna_game", ["e5", "c5"].reverse()],
+  //   ["queen_gambit", ["d5", "c5"].reverse()],
+  //   ["london_opening", ["e5", "Nf6", "Bc5"].reverse()],
+  //   ["catalan_opening", ["d5", "c5", "g6"].reverse()],
+  // ]);
   private minimaxSearchDepth: number;
   private curEvaluationScore: number;
   private openingMoves: MoveSAN[] = [];
@@ -119,21 +120,22 @@ class ChessAIEngine extends ChessEngine {
 
   constructor(
     difficultyLevel: number,
-    openingStrategy: string = "italian_game"
+    fen: string = "",
+    // openingStrategy: string = "italian_game"
   ) {
-    super();
+    super(fen);
     this.curEvaluationScore =
       10000 + this.calcEvaluationScore(this.chess.board());
     this.minimaxSearchDepth = difficultyLevel * 2 + 1;
 
-    if (openingStrategy === "random") {
-      let openingMovesList = Array.from(this.openingMovesMap.values());
-      this.openingMoves =
-        openingMovesList[Math.floor(Math.random() * openingMovesList.length)];
-    } else {
-      if (this.openingMovesMap.has(openingStrategy))
-        this.openingMoves = this.openingMovesMap.get(openingStrategy)!;
-    }
+    // if (openingStrategy === "random") {
+    //   let openingMovesList = Array.from(this.openingMovesMap.values());
+    //   this.openingMoves =
+    //     openingMovesList[Math.floor(Math.random() * openingMovesList.length)];
+    // } else {
+    //   if (this.openingMovesMap.has(openingStrategy))
+    //     this.openingMoves = this.openingMovesMap.get(openingStrategy)!;
+    // }
   }
 
   private switchSide(rank: Rank, file: File): [Rank, File] {
@@ -384,7 +386,7 @@ class ChessAIEngine extends ChessEngine {
    * Computer will analyze and make the best move.
    * @returns the move that computer just made
    */
-  computerMakingMove(): string[] {
+  async computerMakingMove(): Promise<string[]> {
     let bestMove: Move;
     //Perform opening move
     if (this.openingMoves.length > 0) {
@@ -418,11 +420,11 @@ class ChessAIEngine extends ChessEngine {
     console.log(this.curEvaluationScore);
   }
 
-  setMinimaxSearchDepth(difficulty: number) {
+  setSearchDepth(difficulty: number): void {
     this.minimaxSearchDepth = difficulty * 2 + 1;
   }
 
-  playerUndo(): Move | null {
+  playerUndo(): void {
     //Undo computer move and player move
     let moveUndo = this.undo();
     if (moveUndo) {
@@ -435,8 +437,7 @@ class ChessAIEngine extends ChessEngine {
       this.curEvaluationScore =
         10000 + this.calcEvaluationScore(this.chess.board());
     }
-    return moveUndo;
   }
 }
 
-export { ChessAIEngine, GameStatus };
+export { ChessMinimaxModel, GameStatus };
