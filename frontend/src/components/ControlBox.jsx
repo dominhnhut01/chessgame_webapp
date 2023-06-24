@@ -72,17 +72,7 @@ function RoomLinkBox() {
   );
 }
 
-export default function ControlBox() {
-  const { playerUndoEmit, setNewGameEmit, setDifficultyEmit, setAIModelEmit } =
-    useContext(SocketContext);
-  const { playerUndo, checkTurn, setNewGame, gameStatus } =
-    useContext(ChessContext);
-
-  //Message Box
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState("normal");
-  const [visibleMessageBox, setVisibleMessageBox] = useState(false);
-
+function SelectDifficulty() {
   function aiModelSelect(evt) {
     setAIModelEmit(evt.target.value, (succeed) => {
       if (!succeed) alert("Please try setting AI model again");
@@ -94,7 +84,58 @@ export default function ControlBox() {
       if (!succeed) alert("Please try setting difficulty again");
     });
   }
-  function onClickUndoButton(evt) {
+
+  return (
+    <div className="difficulty-select container-fluid">
+      <div className="row gy-3">
+        <div className="col-sm-5 col-md-5 col-lg-5" id="heading">
+          AI Model
+        </div>
+        <div className="col-sm-7 col-md-7 col-lg-7">
+          <select
+            className="form-select"
+            aria-label="aiModel-select"
+            onChange={aiModelSelect}
+          >
+            <option value="minimax">Minimax Model (Easy Mode)</option>
+            <option selected value="stockfish">
+              Stockfish Model (Expert Mode)
+            </option>
+          </select>
+        </div>
+
+        <div className="col-sm-5 col-md-5 col-lg-5" id="heading">
+          Difficulty
+        </div>
+        <div className="col-sm-7 col-md-7 col-lg-7">
+          <select
+            className="form-select"
+            aria-label="difficulty-select"
+            onChange={difficultySelect}
+          >
+            <option value="0">Easy</option>
+            <option selected value="1">
+              Medium
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function ControlBox() {
+  const { isConnected, isMultiplayer, playerUndoEmit, setNewGameEmit, setDifficultyEmit, setAIModelEmit } =
+    useContext(SocketContext);
+  const { playerUndo, checkTurn, setNewGame, gameStatus } =
+    useContext(ChessContext);
+
+  //Message Box
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("normal");
+  const [visibleMessageBox, setVisibleMessageBox] = useState(false);
+
+   function onClickUndoButton(evt) {
     if (checkTurn() !== "w") {
       setVisibleMessageBox(true);
       setMessageType("warning");
@@ -150,41 +191,10 @@ export default function ControlBox() {
   return (
     <div className="control-box-container">
       <div className="control-box shadow-box">
-        <div className="difficulty-select container-fluid">
-          <div className="row gy-3">
-          <div className="col-sm-5 col-md-5 col-lg-5" id="heading">
-              AI Model
-            </div>
-            <div className="col-sm-7 col-md-7 col-lg-7">
-              <select
-                className="form-select"
-                aria-label="aiModel-select"
-                onChange={aiModelSelect}
-              >
-                <option value="minimax">Minimax Model (Easy Mode)</option>
-                <option selected value="stockfish">
-                  Stockfish Model (Expert Mode)
-                </option>
-              </select>
-            </div>
-
-            <div className="col-sm-5 col-md-5 col-lg-5" id="heading">
-              Difficulty
-            </div>
-            <div className="col-sm-7 col-md-7 col-lg-7">
-              <select
-                className="form-select"
-                aria-label="difficulty-select"
-                onChange={difficultySelect}
-              >
-                <option value="0">Easy</option>
-                <option selected value="1">
-                  Medium
-                </option>
-              </select>
-            </div>
-          </div>
-        </div>
+        {(isConnected && isMultiplayer) ? 
+          <div> Webcam here </div>
+          :
+          <SelectDifficulty/>}
         <h6 id="move-history-heading">Move History</h6>
         <div className="history-box shadow-box">
           <HistoryBox />
@@ -197,7 +207,7 @@ export default function ControlBox() {
             className="button circle-frame"
             onClick={onClickUndoButton}
             data-tooltip-id="bottom-tooltip" data-tooltip-content="Undo"
->
+          >
             Undo
           </BiUndo>
           <BiRefresh
