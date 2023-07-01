@@ -31,6 +31,7 @@ const SocketContextProvider = (props) => {
   const [roomID, setRoomID] = useState(useParams().roomID);
   const [playerColor, setPlayerColor] = useState("white");
   const [isConnected, setIsConnected] = useState(socket.connected);
+  const [isMultiplayer, setIsMultiplayer] = useState(false);
   const baseLink = window.location.href
   const [roomLink, setRoomLink] = useState(
     roomID ? `${baseLink}${roomID}` : ""
@@ -46,10 +47,11 @@ const SocketContextProvider = (props) => {
           // Handle timeout
           resolve(false); // Resolve the promise with false indicating failure
         }, 300); // Timeout duration in milliseconds (e.g., 5000ms = 5 seconds)
-    
+
         socket.emit("joinRoom", roomID, async (succeed, roomID, playerColorReturn) => {
+
           clearTimeout(timeout); // Clear the timeout since the callback was executed
-    
+
           setIsConnected(succeed);
           if (!succeed) {
             alert("Room is full or does not exist! Please reload the website to continue");
@@ -57,11 +59,13 @@ const SocketContextProvider = (props) => {
             ChessAndSocketEventEmitter.emit("setNewGame");
             navigate('/');
           }
-          if (playerColor !== playerColorReturn)
+          if (playerColor !== playerColorReturn){
+            setIsMultiplayer(true);
             setPlayerColor(playerColorReturn);
+          }
           setRoomID(roomID);
           setRoomLink(`${baseLink}${roomID}`);
-    
+
           resolve(succeed); // Resolve the promise with the value of succeed
         });
       });
@@ -109,7 +113,7 @@ const SocketContextProvider = (props) => {
   socket.on(
     "opponentMakeMove",
     (opponentMoveFrom, opponentMoveTo) => {
-      
+
       ChessAndSocketEventEmitter.emit("opponentMakeMove", {
         opponentMoveFrom,
         opponentMoveTo,
@@ -118,12 +122,15 @@ const SocketContextProvider = (props) => {
   );
 
   socket.on("setNewGame", () => {
+    console.log('on set multiplayer game data');
+    setIsMultiplayer(true);
     ChessAndSocketEventEmitter.emit("setNewGame");
   })
 
   socket.on("opponentDisconnected", () => {
     alert("Opponent disconnected! Please reload the website to start a new game");
     socket.disconnect();
+    setIsMultiplayer(false);
     navigate('/');
     ChessAndSocketEventEmitter.emit("setNewGame");
   })
@@ -164,6 +171,7 @@ const SocketContextProvider = (props) => {
       value={{
         avatars,
         isConnected,
+        isMultiplayer,
         playerUndoEmit,
         setNewGameEmit,
         setDifficultyEmit,

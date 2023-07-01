@@ -7,6 +7,7 @@ import { Tooltip } from "react-tooltip";
 import "./ControlBox.css";
 import { ChessContext } from "../ContextProvider/ChessContextProvider";
 import { SocketContext } from "../ContextProvider/SocketContextProvider";
+import WebcamContainer from './WebcamContainer';
 
 function HistoryBox() {
   const { moveHistory } = useContext(ChessContext);
@@ -191,8 +192,8 @@ export default function ControlBox() {
   return (
     <div className="control-box-container">
       <div className="control-box shadow-box">
-        {(isConnected && isMultiplayer) ? 
-          <div> Webcam here </div>
+        {isMultiplayer ?
+          <div> hi </div>
           :
           <SelectDifficulty/>}
         <h6 id="move-history-heading">Move History</h6>
@@ -236,3 +237,15 @@ export default function ControlBox() {
     </div>
   );
 }
+
+export function MultiplayerControlBox() {
+
+  return (
+    <div className="control-box-container">
+      <div className="control-box shadow-box">
+        <WebcamContainer/>
+      </div>
+    </div>
+  );
+}
+

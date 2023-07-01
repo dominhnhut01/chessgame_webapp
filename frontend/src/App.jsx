@@ -1,6 +1,6 @@
 import "./App.css";
 import { SocketContextProvider } from "./ContextProvider/SocketContextProvider";
-import ControlBox from "./components/ControlBox";
+import ControlBox, { MultiplayerControlBox } from "./components/ControlBox";
 import { ChessContextProvider } from "./ContextProvider/ChessContextProvider";
 import GameContainer from "./components/GameContainer";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -8,6 +8,7 @@ import { MDBFooter } from "mdb-react-ui-kit";
 import { VscGithub } from "react-icons/vsc";
 
 function App() {
+  // const { isConnected } = useContext(SocketContextProvider);
   return (
     <div className="app-wrapper">
       <BrowserRouter>
