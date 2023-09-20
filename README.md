@@ -33,6 +33,7 @@ Also, here are some real footage you can watch:
 
 ### Backend
 - Minimax search for AI agent: An algorithm used for AI opponents in chess that makes optimal decisions based on game tree exploration, can explore over 3 million moves in future.
+- State-of-the-art Stockfish Engine powered
 - Socket.io: Real-time communication library for enabling multiplayer functionality.
 - Node.js + TypeScript
 
